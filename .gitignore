@@ -1,0 +1,21 @@
+# Editor backup files
+*~
+\#*
+.#*
+
+# automake/autoconf stuff
+aclocal.m4
+autom4te.cache
+compile
+config.log
+config.status
+configure
+depcomp
+.deps
+install-sh
+Makefile
+Makefile.in
+missing
+
+# Compiler output
+*.o
