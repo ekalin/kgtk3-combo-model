@@ -15,6 +15,14 @@ PKG_CHECK_MODULES([GTK], [gtk+-3.0])
 AC_SUBST([GTK_CFLAGS])
 AC_SUBST([GTK_LIBS])
 
+GOBJECT_INTROSPECTION_CHECK([1.40.0])
+if test "x$found_introspection" = "xyes"; then
+   INTROSPECTION_GIRDIR=`$PKG_CONFIG --define-variable=prefix='${prefix}' --variable=girdir gobject-introspection-1.0`
+   AC_SUBST(INTROSPECTION_GIRDIR)
+
+   INTROSPECTION_TYPELIBDIR=`$PKG_CONFIG --define-variable=prefix='${prefix}' --variable=typelibdir gobject-introspection-1.0`
+   AC_SUBST(INTROSPECTION_TYPELIBDIR)
+fi
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
