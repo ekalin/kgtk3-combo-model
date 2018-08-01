@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use Gtk3 -init;
+use KGtk3::ComboModel;
+
+
+my $window = Gtk3::Window->new('toplevel');
+$window->signal_connect(delete_event => sub { Gtk3::main_quit() });
+
+my $button = KGtk3::ComboModelButton->new('Click me');
+$button->signal_connect(clicked => sub { print "Clicked\n"; });
+$window->add($button);
+
+$window->show_all();
+Gtk3::main();
