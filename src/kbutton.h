@@ -3,10 +3,10 @@
 
 G_BEGIN_DECLS
 
-#define K_TYPE_BUTTON (k_button_get_type())
-G_DECLARE_FINAL_TYPE(KButton, k_button, K, BUTTON, GtkButton)
+#define KGTK3_TYPE_COMBO_MODEL_BUTTON (kgtk3_combo_model_button_get_type())
+G_DECLARE_FINAL_TYPE(KGtk3ComboModelButton, kgtk3_combo_model_button, KGTK3, COMBO_MODEL_BUTTON, GtkButton)
 
-GtkWidget *k_button_new(gchar *label);
+GtkWidget *kgtk3_combo_model_button_new(gchar *label);
 
 G_END_DECLS
 
