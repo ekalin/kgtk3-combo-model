@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libkgtk3-combo-model-1.0.la
-libkgtk3_combo_model_1_0_la_SOURCES = kbutton.c
-include_HEADERS = kbutton.h
+libkgtk3_combo_model_1_0_la_SOURCES = kgtk3-combo-model.c kbutton.c
+include_HEADERS = kgtk3-combo-model.h kbutton.h
 libkgtk3_combo_model_1_0_la_CPPFLAGS = $(GTK_CFLAGS)
 libkgtk3_combo_model_1_0_la_LIBADD = $(GTK_LIBS)
 

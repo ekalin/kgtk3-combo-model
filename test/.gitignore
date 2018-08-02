@@ -1,0 +1,5 @@
+*.log
+*.trs
+test-suite.log
+
+test-combo-model

@@ -25,5 +25,6 @@ if test "x$found_introspection" = "xyes"; then
 fi
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+                 test/Makefile])
 AC_OUTPUT
