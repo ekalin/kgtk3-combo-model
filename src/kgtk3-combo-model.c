@@ -7,12 +7,14 @@ struct _KGtk3ComboModel
 {
   GObject       parent_instance;
   GtkTreeModel *base_model;
+  gint          separator_column;
 };
 
 
 static void kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface);
 static GtkTreeModelFlags kgtk3_combo_model_get_flags(GtkTreeModel *model);
 static gint kgtk3_combo_model_get_n_columns(GtkTreeModel *model);
+static GType kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -40,8 +42,8 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
 {
   iface->get_flags = kgtk3_combo_model_get_flags;
   iface->get_n_columns = kgtk3_combo_model_get_n_columns;
+  iface->get_column_type = kgtk3_combo_model_get_column_type;
   /*
-  iface->get_column_type = gtk_tree_model_filter_get_column_type;
   iface->get_iter = gtk_tree_model_filter_get_iter;
   iface->get_path = gtk_tree_model_filter_get_path;
   iface->get_value = gtk_tree_model_filter_get_value;
@@ -65,6 +67,7 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
 
   KGtk3ComboModel *self = g_object_new(KGTK3_TYPE_COMBO_MODEL, NULL);
   self->base_model = base_model;
+  self->separator_column = gtk_tree_model_get_n_columns(base_model);
 
   return self;
 }
@@ -89,3 +92,17 @@ kgtk3_combo_model_get_n_columns(GtkTreeModel *model)
   return gtk_tree_model_get_n_columns(KGTK3_COMBO_MODEL(model)->base_model) + 1;
 }
 
+
+static
+GType
+kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index)
+{
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
+
+  if (index == cmodel->separator_column) {
+    return G_TYPE_BOOLEAN;
+  } else {
+    return gtk_tree_model_get_column_type(cmodel->base_model, index);
+  }
+}

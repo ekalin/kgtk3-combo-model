@@ -62,6 +62,14 @@ main(int argc, char *argv[])
   check(gtk_tree_model_get_n_columns(cmodel)
         == gtk_tree_model_get_n_columns(model) + 1,
         "should return one more column");
+  check(gtk_tree_model_get_column_type(cmodel, 0)
+        == gtk_tree_model_get_column_type(model, 0),
+        "should return existing column type (column 0)");
+  check(gtk_tree_model_get_column_type(cmodel, 1)
+        == gtk_tree_model_get_column_type(model, 1),
+        "should return existing column type (column 1)");
+  check(gtk_tree_model_get_column_type(cmodel, 2) == G_TYPE_BOOLEAN,
+        "should return boolean type for last column");
 
 
   /*
