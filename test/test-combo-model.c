@@ -52,8 +52,16 @@ main(int argc, char *argv[])
   /*
    * Flags
    */
-  check(gtk_tree_model_get_flags(model) == gtk_tree_model_get_flags(cmodel),
+  check(gtk_tree_model_get_flags(cmodel) == gtk_tree_model_get_flags(model),
         "should return the same flags");
+
+
+  /*
+   * Columns
+   */
+  check(gtk_tree_model_get_n_columns(cmodel)
+        == gtk_tree_model_get_n_columns(model) + 1,
+        "should return one more column");
 
 
   /*

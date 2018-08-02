@@ -12,6 +12,7 @@ struct _KGtk3ComboModel
 
 static void kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface);
 static GtkTreeModelFlags kgtk3_combo_model_get_flags(GtkTreeModel *model);
+static gint kgtk3_combo_model_get_n_columns(GtkTreeModel *model);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -38,8 +39,8 @@ void
 kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
 {
   iface->get_flags = kgtk3_combo_model_get_flags;
+  iface->get_n_columns = kgtk3_combo_model_get_n_columns;
   /*
-  iface->get_n_columns = gtk_tree_model_filter_get_n_columns;
   iface->get_column_type = gtk_tree_model_filter_get_column_type;
   iface->get_iter = gtk_tree_model_filter_get_iter;
   iface->get_path = gtk_tree_model_filter_get_path;
@@ -77,3 +78,14 @@ kgtk3_combo_model_get_flags(GtkTreeModel *model)
 
   return gtk_tree_model_get_flags(KGTK3_COMBO_MODEL(model)->base_model);
 }
+
+
+static
+gint
+kgtk3_combo_model_get_n_columns(GtkTreeModel *model)
+{
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+
+  return gtk_tree_model_get_n_columns(KGTK3_COMBO_MODEL(model)->base_model) + 1;
+}
+
