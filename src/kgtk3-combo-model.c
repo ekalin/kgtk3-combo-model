@@ -17,6 +17,7 @@ static gint kgtk3_combo_model_get_n_columns(GtkTreeModel *model);
 static GType kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index);
 static gboolean kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *path);
 static gboolean kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter);
+static gboolean kgtk3_combo_model_iter_has_child(GtkTreeModel *model, GtkTreeIter *iter);
 static gint kgtk3_combo_model_iter_n_children(GtkTreeModel *model, GtkTreeIter *iter);
 
 
@@ -55,8 +56,8 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
   /*
   iface->iter_previous = gtk_tree_model_filter_iter_previous;
   iface->iter_children = gtk_tree_model_filter_iter_children;
-  iface->iter_has_child = gtk_tree_model_filter_iter_has_child;
   */
+  iface->iter_has_child = kgtk3_combo_model_iter_has_child;
   iface->iter_n_children = kgtk3_combo_model_iter_n_children;
   /*
   iface->iter_nth_child = gtk_tree_model_filter_iter_nth_child;
@@ -134,6 +135,14 @@ kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter)
 
   // TODO
   return gtk_tree_model_iter_next(KGTK3_COMBO_MODEL(model)->base_model, iter);
+}
+
+
+static
+gboolean
+kgtk3_combo_model_iter_has_child(GtkTreeModel *model, GtkTreeIter *iter)
+{
+  return kgtk3_combo_model_iter_n_children(model, iter) > 0;
 }
 
 

@@ -107,16 +107,20 @@ main(int argc, char *argv[])
         "should return boolean type for last column");
 
   /*
-   * Existence of children
+   * Existence and number of children
    */
   check(gtk_tree_model_iter_n_children(cmodel, NULL) == 3,
         "should return number of root children when NULL is passed to iter_n_children");
 
   gtk_tree_model_get_iter_first(cmodel, &top_level);
+  check(!gtk_tree_model_iter_has_child(cmodel, &top_level),
+        "should return no children if original has children - iter_has_child");
   check(gtk_tree_model_iter_n_children(cmodel, &top_level) == 0,
         "should return 0 children if original has children - iter_n_children");
 
   gtk_tree_model_iter_next(cmodel, &top_level);
+  check(gtk_tree_model_iter_has_child(cmodel, &top_level),
+        "should return two extra children if original has children - iter_has_child");
   check(gtk_tree_model_iter_n_children(cmodel, &top_level) == 5,
         "should return two extra children if original has children - iter_n_children");
 
