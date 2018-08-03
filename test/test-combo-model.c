@@ -15,6 +15,13 @@ void check(int result, const char *msg)
   }
 }
 
+void check_col_int(GtkTreeModel *model, GtkTreeIter *iter, int expected, const char *msg)
+{
+  gint value;
+  gtk_tree_model_get(model, iter, 0, &value, -1);
+  check(expected == value, msg);
+}
+
 void check_col_str(GtkTreeModel *model, GtkTreeIter *iter, const char *expected, const char *msg)
 {
   gchar *value;
@@ -132,6 +139,17 @@ main(int argc, char *argv[])
   check(gtk_tree_model_iter_n_children(cmodel, &top_level) == 5,
         "should return two extra children if original has children - iter_n_children");
 
+  gtk_tree_model_iter_children(cmodel, &child, &top_level);
+  check(!gtk_tree_model_iter_has_child(cmodel, &child),
+        "should return no children for virtual items - header - iter_has_children");
+  check(gtk_tree_model_iter_n_children(cmodel, &child) == 0,
+        "should return no children for virtual items - header - iter_n_children");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check(!gtk_tree_model_iter_has_child(cmodel, &child),
+        "should return no children for virtual items - separator - iter_has_children");
+  check(gtk_tree_model_iter_n_children(cmodel, &child) == 0,
+        "should return no children for virtual items - separator - iter_n_children");
 
   /*
    * Getting child iters
@@ -148,6 +166,41 @@ main(int argc, char *argv[])
         "should return false for children when iter has no children - iter_children");
   check(!gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3),
         "should return false for children when iter has no children - iter_nth_child");
+
+  check(!gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 4),
+        "should return false for children when index is invalid - level 0");
+
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 2);
+  check(!gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 5),
+        "should return false for children when index is invalid - level 1");
+
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+  gtk_tree_model_iter_children(cmodel, &child, &top_level);
+  check(!gtk_tree_model_iter_children(cmodel, &subchild, &child),
+        "should return false for children on virtual items");
+
+  /*
+   * Getting extra children with iter_nth_child
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 0);
+  check_col_int(cmodel, &child, 10,
+                "should return extra children with with nth child - parent header (col 0)");
+  check_col_str(cmodel, &child, "Root 2",
+                "should return extra children with with nth child - parent header (col 1)");
+
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 2);
+  check_col_int(cmodel, &child, 11,
+                "should return extra children with with nth child - existing item 1 (col 0)");
+  check_col_str(cmodel, &child, "Child 2.1",
+                "should return extra children with with nth child - existing item 1 (col 1)");
+
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3);
+  check_col_int(cmodel, &child, 23,
+                "should return extra children with with nth child - existing item 2 (col 0)");
+  check_col_str(cmodel, &child, "Child 2.2",
+                "should return extra children with with nth child - existing item 2 (col 1)");
 
 
   /*

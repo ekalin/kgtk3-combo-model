@@ -10,6 +10,11 @@ struct _KGtk3ComboModel
   gint          separator_column;
 };
 
+#define TYPE_REGULAR   GINT_TO_POINTER(0)
+#define TYPE_HEADER    GINT_TO_POINTER(1)
+#define TYPE_SEPARATOR GINT_TO_POINTER(2)
+
+
 
 static void kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface);
 static GtkTreeModelFlags kgtk3_combo_model_get_flags(GtkTreeModel *model);
@@ -126,7 +131,9 @@ kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *
   g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
 
   // TODO
-  return gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, path);
+  gboolean ret = gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, path);
+  iter->user_data3 = TYPE_REGULAR;
+  return ret;
 }
 
 
@@ -148,7 +155,9 @@ kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter)
   g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
 
   // TODO
-  return gtk_tree_model_iter_next(KGTK3_COMBO_MODEL(model)->base_model, iter);
+  gboolean ret = gtk_tree_model_iter_next(KGTK3_COMBO_MODEL(model)->base_model, iter);
+  iter->user_data3 = TYPE_REGULAR;
+  return ret;
 }
 
 
@@ -174,9 +183,11 @@ kgtk3_combo_model_iter_n_children(GtkTreeModel *model, GtkTreeIter *iter)
 {
   g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
 
-  gint n_children = gtk_tree_model_iter_n_children(KGTK3_COMBO_MODEL(model)->base_model, iter);
-  // TODO
+  if (iter && (iter->user_data3 == TYPE_HEADER || iter->user_data3 == TYPE_SEPARATOR)) {
+    return 0;
+  }
 
+  gint n_children = gtk_tree_model_iter_n_children(KGTK3_COMBO_MODEL(model)->base_model, iter);
   if (iter == NULL) {
     return n_children;
   } else {
@@ -193,15 +204,22 @@ kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTree
   KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
   if (parent == NULL) {
-    return gtk_tree_model_iter_nth_child(cmodel->base_model, iter, NULL, n);
+    gboolean ret = gtk_tree_model_iter_nth_child(cmodel->base_model, iter, NULL, n);
+    iter->user_data3 = TYPE_REGULAR;
+    return ret;
   } else {
-    if (gtk_tree_model_iter_has_child(cmodel->base_model, parent)) {
+    if (!kgtk3_combo_model_iter_has_child(GTK_TREE_MODEL(cmodel), parent)) {
       return FALSE;
     }
 
-    // TODO
-
-    return gtk_tree_model_iter_nth_child(cmodel->base_model, iter, parent, n - 2);
+    if (n == 0 || n == 1) {
+      *iter = *parent;
+      iter->user_data3 = n == 0 ? TYPE_HEADER : TYPE_SEPARATOR;
+      return TRUE;
+    } else {
+      gboolean ret = gtk_tree_model_iter_nth_child(cmodel->base_model, iter, parent, n - 2);
+      iter->user_data3 = TYPE_REGULAR;
+      return ret;
+    }
   }
-  return 0;
 }
