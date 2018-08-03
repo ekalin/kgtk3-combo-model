@@ -186,21 +186,56 @@ main(int argc, char *argv[])
 
   gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 0);
   check_col_int(cmodel, &child, 10,
-                "should return extra children with with nth child - parent header (col 0)");
+                "should return extra children with nth child - parent header (col 0)");
   check_col_str(cmodel, &child, "Root 2",
-                "should return extra children with with nth child - parent header (col 1)");
+                "should return extra children with nth child - parent header (col 1)");
 
   gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 2);
   check_col_int(cmodel, &child, 11,
-                "should return extra children with with nth child - existing item 1 (col 0)");
+                "should return extra children with nth child - existing item 1 (col 0)");
   check_col_str(cmodel, &child, "Child 2.1",
-                "should return extra children with with nth child - existing item 1 (col 1)");
+                "should return extra children with nth child - existing item 1 (col 1)");
 
   gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3);
   check_col_int(cmodel, &child, 23,
-                "should return extra children with with nth child - existing item 2 (col 0)");
+                "should return extra children with nth child - existing item 2 (col 0)");
   check_col_str(cmodel, &child, "Child 2.2",
-                "should return extra children with with nth child - existing item 2 (col 1)");
+                "should return extra children with nth child - existing item 2 (col 1)");
+
+  /*
+   * Getting extra children with iter_next
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+
+  gtk_tree_model_iter_children(cmodel, &child, &top_level);
+  check_col_int(cmodel, &child, 10,
+                "should return extra children with iter_next - parent header (col 0)");
+  check_col_str(cmodel, &child, "Root 2",
+                "should return extra children with iter_next - parent header (col 1)");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  /* Separator */
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_int(cmodel, &child, 11,
+                "should return extra children with iter_next - existing item 1 (col 0)");
+  check_col_str(cmodel, &child, "Child 2.1",
+                "should return extra children with iter_next - existing item 1 (col 1)");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_int(cmodel, &child, 23,
+                "should return extra children with iter_next - existing item 2 (col 0)");
+  check_col_str(cmodel, &child, "Child 2.2",
+                "should return extra children with iter_next - existing item 2 (col 1)");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_int(cmodel, &child, 30,
+                "should return extra children with iter_next - existing item 3 (col 0)");
+  check_col_str(cmodel, &child, "Child 2.3",
+                "should return extra children with iter_next - existing item 3 (col 1)");
+
+  check(!gtk_tree_model_iter_next(cmodel, &child),
+        "should return extra children with iter_next - no more children");
 
 
   /*

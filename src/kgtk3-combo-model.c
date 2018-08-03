@@ -153,11 +153,22 @@ gboolean
 kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter)
 {
   g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
-  // TODO
-  gboolean ret = gtk_tree_model_iter_next(KGTK3_COMBO_MODEL(model)->base_model, iter);
-  iter->user_data3 = TYPE_REGULAR;
-  return ret;
+  if (iter->user_data3 == TYPE_HEADER) {
+    iter->user_data3 = TYPE_SEPARATOR;
+    return TRUE;
+  } else if (iter->user_data3 == TYPE_SEPARATOR) {
+    GtkTreeIter child;
+    gtk_tree_model_iter_children(cmodel->base_model, &child, iter);
+    *iter = child;
+    iter->user_data3 = TYPE_REGULAR;
+    return TRUE;
+  } else {
+    gboolean ret = gtk_tree_model_iter_next(cmodel->base_model, iter);
+    iter->user_data3 = TYPE_REGULAR;
+    return ret;
+  }
 }
 
 
