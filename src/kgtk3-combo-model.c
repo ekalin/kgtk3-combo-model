@@ -113,7 +113,7 @@ static
 GType
 kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index)
 {
-  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), G_TYPE_INVALID);
   KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
   if (index == cmodel->separator_column) {
@@ -128,7 +128,7 @@ static
 gboolean
 kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *path)
 {
-  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
 
   // TODO
   gboolean ret = gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, path);
@@ -152,7 +152,7 @@ static
 gboolean
 kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter)
 {
-  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
   KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
   if (iter->user_data3 == TYPE_HEADER) {
@@ -176,7 +176,7 @@ static
 gboolean
 kgtk3_combo_model_iter_children(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent)
 {
-  return kgtk3_combo_model_iter_nth_child(model, iter, parent, 0);
+  return kgtk3_combo_model_iter_nth_child(model, iter, parent, FALSE);
 }
 
 
@@ -211,7 +211,7 @@ static
 gboolean
 kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent, gint n)
 {
-  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), 0);
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
   KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
   if (parent == NULL) {
