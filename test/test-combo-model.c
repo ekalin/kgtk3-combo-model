@@ -15,6 +15,14 @@ void check(int result, const char *msg)
   }
 }
 
+void check_col_str(GtkTreeModel *model, GtkTreeIter *iter, const char *expected, const char *msg)
+{
+  gchar *value;
+  gtk_tree_model_get(model, iter, 1, &value, -1);
+  check(strcmp(expected, value) == 0, msg);
+  g_free(value);
+}
+
 
 int
 main(int argc, char *argv[])
@@ -123,6 +131,23 @@ main(int argc, char *argv[])
         "should return two extra children if original has children - iter_has_child");
   check(gtk_tree_model_iter_n_children(cmodel, &top_level) == 5,
         "should return two extra children if original has children - iter_n_children");
+
+
+  /*
+   * Getting child iters
+   */
+  gtk_tree_model_iter_children(cmodel, &top_level, NULL);
+  check_col_str(cmodel, &top_level, "Root 1",
+                "should return first iter for iter_children when passed NULL");
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 2);
+  check_col_str(cmodel, &top_level, "Root 3",
+                "should return top level iter for iter_nth_child when passed NULL");
+
+  gtk_tree_model_get_iter_first(cmodel, &top_level);
+  check(!gtk_tree_model_iter_children(cmodel, &child, &top_level),
+        "should return false for children when iter has no children - iter_children");
+  check(!gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3),
+        "should return false for children when iter has no children - iter_nth_child");
 
 
   /*
