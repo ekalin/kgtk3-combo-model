@@ -265,6 +265,30 @@ main(int argc, char *argv[])
                  "should add extra separator column - level 1, existing item");
 
 
+  /*
+   * Deeper hierarchy
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 2);
+
+  gtk_tree_model_iter_children(cmodel, &subchild, &child);
+  check_col_str(cmodel, &subchild, "Child 3.1",
+                "should work with deeper hierarchies - level 2 header");
+
+  gtk_tree_model_iter_next(cmodel, &subchild);
+  check_col_bool(cmodel, &subchild, TRUE,
+                 "should work with deeper hierarchies - level 2 separator");
+
+  gtk_tree_model_iter_nth_child(cmodel, &subchild, &child, 2);
+  check_col_str(cmodel, &subchild, "Child 3.1.1",
+                "should work with deeper hierarchies - level 2 regular");
+
+  check(!gtk_tree_model_iter_next(cmodel, &subchild),
+        "should work with deeper hierarchies - no more children");
+
+  check(!gtk_tree_model_iter_children(cmodel, &top_level, &subchild),
+        "should work with deeper hierarchies - no level 3 children");
+
 
   /*
    * End
