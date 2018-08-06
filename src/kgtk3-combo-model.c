@@ -142,9 +142,14 @@ void
 kgtk3_combo_model_get_value(GtkTreeModel *model, GtkTreeIter *iter, gint column, GValue *value)
 {
   g_return_if_fail(KGTK3_IS_COMBO_MODEL(model));
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
 
-  // TODO
-  return gtk_tree_model_get_value(KGTK3_COMBO_MODEL(model)->base_model, iter, column, value);
+  if (column == cmodel->separator_column) {
+    g_value_init(value, G_TYPE_BOOLEAN);
+    g_value_set_boolean(value, iter->user_data3 == TYPE_SEPARATOR);
+  } else {
+    return gtk_tree_model_get_value(KGTK3_COMBO_MODEL(model)->base_model, iter, column, value);
+  }
 }
 
 

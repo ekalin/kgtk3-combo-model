@@ -15,10 +15,17 @@ void check(int result, const char *msg)
   }
 }
 
-void check_col_int(GtkTreeModel *model, GtkTreeIter *iter, int expected, const char *msg)
+void check_col_int(GtkTreeModel *model, GtkTreeIter *iter, gint expected, const char *msg)
 {
   gint value;
   gtk_tree_model_get(model, iter, 0, &value, -1);
+  check(expected == value, msg);
+}
+
+void check_col_bool(GtkTreeModel *model, GtkTreeIter *iter, gboolean expected, const char *msg)
+{
+  gboolean value;
+  gtk_tree_model_get(model, iter, 2, &value, -1);
   check(expected == value, msg);
 }
 
@@ -236,6 +243,27 @@ main(int argc, char *argv[])
 
   check(!gtk_tree_model_iter_next(cmodel, &child),
         "should return extra children with iter_next - no more children");
+
+
+  /*
+   * Extra separator column
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+  check_col_bool(cmodel, &top_level, FALSE,
+                 "should add extra separator column - level 0");
+
+  gtk_tree_model_iter_children(cmodel, &child, &top_level);
+  check_col_bool(cmodel, &child, FALSE,
+                 "should add extra separator column - level 1, parent header");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_bool(cmodel, &child, TRUE,
+                 "should add extra separator column - level 1, separator");
+
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_bool(cmodel, &child, FALSE,
+                 "should add extra separator column - level 1, existing item");
+
 
 
   /*
