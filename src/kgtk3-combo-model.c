@@ -27,6 +27,7 @@ static gboolean kgtk3_combo_model_iter_children(GtkTreeModel *model, GtkTreeIter
 static gboolean kgtk3_combo_model_iter_has_child(GtkTreeModel *model, GtkTreeIter *iter);
 static gint kgtk3_combo_model_iter_n_children(GtkTreeModel *model, GtkTreeIter *iter);
 static gboolean kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent, gint n);
+static gboolean kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *child);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -68,8 +69,8 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
   iface->iter_has_child = kgtk3_combo_model_iter_has_child;
   iface->iter_n_children = kgtk3_combo_model_iter_n_children;
   iface->iter_nth_child = kgtk3_combo_model_iter_nth_child;
+  iface->iter_parent = kgtk3_combo_model_iter_parent;
   /*
-  iface->iter_parent = gtk_tree_model_filter_iter_parent;
   iface->ref_node = gtk_tree_model_filter_ref_node;
   iface->unref_node = gtk_tree_model_filter_unref_node;
   */
@@ -237,5 +238,23 @@ kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTree
       iter->user_data3 = TYPE_REGULAR;
       return ret;
     }
+  }
+}
+
+
+static
+gboolean
+kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *child)
+{
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
+
+  if (child->user_data3 == TYPE_HEADER || child->user_data3 == TYPE_SEPARATOR) {
+    *iter = *child;
+    iter->user_data3 = TYPE_REGULAR;
+    return TRUE;
+  } else {
+    gboolean ret = gtk_tree_model_iter_parent(KGTK3_COMBO_MODEL(model)->base_model, iter, child);
+    iter->user_data3 = TYPE_REGULAR;
+    return ret;
   }
 }

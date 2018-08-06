@@ -44,7 +44,7 @@ main(int argc, char *argv[])
   /*
    * Set up
    */
-  GtkTreeIter top_level, child, subchild;
+  GtkTreeIter top_level, child, subchild, parent;
 
   gtk_init(&argc, &argv);
   GtkTreeStore *model_store = gtk_tree_store_new(2,
@@ -288,6 +288,25 @@ main(int argc, char *argv[])
 
   check(!gtk_tree_model_iter_children(cmodel, &top_level, &subchild),
         "should work with deeper hierarchies - no level 3 children");
+
+
+  /*
+   * Parent
+   */
+  gtk_tree_model_get_iter_first(cmodel, &top_level);
+  check(!gtk_tree_model_iter_parent(cmodel, &parent, &top_level),
+        "should return no parent for root item");
+
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3);
+  gtk_tree_model_iter_parent(cmodel, &parent, &child);
+  check_col_str(cmodel, &parent, "Root 2",
+                "should return parent for regular item");
+
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 0);
+  gtk_tree_model_iter_parent(cmodel, &parent, &child);
+  check_col_str(cmodel, &parent, "Root 2",
+                "should return parent for extra item");
 
 
   /*
