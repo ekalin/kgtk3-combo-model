@@ -45,6 +45,7 @@ main(int argc, char *argv[])
    * Set up
    */
   GtkTreeIter top_level, child, subchild, parent;
+  GtkTreePath *path;
 
   gtk_init(&argc, &argv);
   GtkTreeStore *model_store = gtk_tree_store_new(2,
@@ -307,6 +308,53 @@ main(int argc, char *argv[])
   gtk_tree_model_iter_parent(cmodel, &parent, &child);
   check_col_str(cmodel, &parent, "Root 2",
                 "should return parent for extra item");
+
+
+  /*
+   * Getting iter from paths
+   */
+  path = gtk_tree_path_new_from_indices(2, -1);
+  gtk_tree_model_get_iter(cmodel, &top_level, path);
+  check_col_str(cmodel, &top_level, "Root 3",
+                "should return iter from path - level 0");
+  gtk_tree_path_free(path);
+
+  path = gtk_tree_path_new_from_indices(1, 2, -1);
+  gtk_tree_model_get_iter(cmodel, &child, path);
+  check_col_str(cmodel, &child, "Child 2.1",
+                "should return iter from path - level 1 regular");
+  gtk_tree_path_free(path);
+
+  path = gtk_tree_path_new_from_indices(2, 0, -1);
+  gtk_tree_model_get_iter(cmodel, &child, path);
+  check_col_str(cmodel, &child, "Root 3",
+                "should return iter from path - level 1 virtual");
+  gtk_tree_path_free(path);
+  gtk_tree_model_iter_next(cmodel, &child);
+  check_col_bool(cmodel, &child, TRUE,
+        "should return iter from path - level 1 virtual - iter_next");
+
+  path = gtk_tree_path_new_from_indices(2, 2, 2, -1);
+  gtk_tree_model_get_iter(cmodel, &subchild, path);
+  check_col_str(cmodel, &subchild, "Child 3.1.1",
+                "should return iter from path - level 2 regular");
+  gtk_tree_path_free(path);
+
+  path = gtk_tree_path_new_from_indices(2, 2, 1, -1);
+  gtk_tree_model_get_iter(cmodel, &subchild, path);
+  check_col_bool(cmodel, &subchild, TRUE,
+                "should return iter from path - level 2 virtual");
+  gtk_tree_path_free(path);
+
+  path = gtk_tree_path_new_from_indices(4, -1);
+  check(!gtk_tree_model_get_iter(cmodel, &top_level, path),
+        "should return false for non existing path - level 0");
+  gtk_tree_path_free(path);
+
+  path = gtk_tree_path_new_from_indices(1, 10, -1);
+  check(!gtk_tree_model_get_iter(cmodel, &top_level, path),
+        "should return false for non existing path - level 1");
+  gtk_tree_path_free(path);
 
 
   /*

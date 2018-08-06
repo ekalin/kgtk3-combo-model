@@ -131,10 +131,42 @@ kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *
 {
   g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
 
-  // TODO
-  gboolean ret = gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, path);
-  iter->user_data3 = TYPE_REGULAR;
-  return ret;
+  gint depth = gtk_tree_path_get_depth(path);
+  if (depth == 1) {
+    gboolean ret = gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, path);
+    iter->user_data3 = TYPE_REGULAR;
+    return ret;
+  }
+
+  gint *indices = gtk_tree_path_get_indices(path);
+
+  GtkTreePath *new_path = gtk_tree_path_new();
+  gtk_tree_path_append_index(new_path, indices[0]);
+  for (int i = 1; i < depth - 1; ++i) {
+    gtk_tree_path_append_index(new_path, indices[i] - 2);
+  }
+  gint last_index = -1;
+  if (indices[depth - 1] >= 2) {
+    gtk_tree_path_append_index(new_path, indices[depth - 1] - 2);
+  } else {
+    last_index = indices[depth - 1];
+  }
+
+  gboolean ret = gtk_tree_model_get_iter(KGTK3_COMBO_MODEL(model)->base_model, iter, new_path);
+  gtk_tree_path_free(new_path);
+  if (!ret) {
+    return FALSE;
+  }
+
+  if (last_index == 0) {
+    iter->user_data3 = TYPE_HEADER;
+  } else if (last_index == 1) {
+    iter->user_data3 = TYPE_SEPARATOR;
+  } else {
+    iter->user_data3 = TYPE_REGULAR;
+  }
+
+  return TRUE;
 }
 
 
