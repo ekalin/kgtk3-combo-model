@@ -40,7 +40,7 @@ G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
 
 static
 void
-kgtk3_combo_model_init(KGtk3ComboModel *kbutton)
+kgtk3_combo_model_init(KGtk3ComboModel *model)
 {
 }
 
