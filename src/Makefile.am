@@ -31,7 +31,7 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 CLEANFILES = $(gir_DATA) $(typelib_DATA)
 endif
 
-bin_PROGRAMS = test
-test_SOURCES = test.c
-test_CPPFLAGS = $(GTK_CFLAGS)
-test_LDADD = libkgtk3-combo-model-1.0.la $(GTK_LIBS)
+noinst_PROGRAMS = example
+example_SOURCES = example.c
+example_CPPFLAGS = $(GTK_CFLAGS)
+example_LDADD = libkgtk3-combo-model-1.0.la $(GTK_LIBS)
