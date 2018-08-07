@@ -61,7 +61,7 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
   iface->get_path = kgtk3_combo_model_get_path;
   iface->get_value = kgtk3_combo_model_get_value;
   iface->iter_next = kgtk3_combo_model_iter_next;
-  /*
+  /* Not necessary - default implementation works
   iface->iter_previous = gtk_tree_model_filter_iter_previous;
   */
   iface->iter_children = kgtk3_combo_model_iter_children;
@@ -69,7 +69,7 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
   iface->iter_n_children = kgtk3_combo_model_iter_n_children;
   iface->iter_nth_child = kgtk3_combo_model_iter_nth_child;
   iface->iter_parent = kgtk3_combo_model_iter_parent;
-  /*
+  /* Not necessary
   iface->ref_node = gtk_tree_model_filter_ref_node;
   iface->unref_node = gtk_tree_model_filter_unref_node;
   */

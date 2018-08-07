@@ -326,6 +326,49 @@ main(int argc, char *argv[])
 
 
   /*
+   * Backwards iteration - root
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 2);
+  check_col_str(cmodel, &top_level, "Root 3",
+                "should iterate backwards in root - item 3");
+
+  gtk_tree_model_iter_previous(cmodel, &top_level);
+  check_col_str(cmodel, &top_level, "Root 2",
+                "should iterate backwards in root - item 2");
+
+  gtk_tree_model_iter_previous(cmodel, &top_level);
+  check_col_str(cmodel, &top_level, "Root 1",
+                "should iterate backwards in root - item 1");
+
+  check(!gtk_tree_model_iter_previous(cmodel, &top_level),
+        "should iterate backwards in root - no more items");
+
+
+  /*
+   * Backwards iteration - subtree
+   */
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 3);
+  check_col_str(cmodel, &child, "Child 2.2",
+                "should iterate backwards in subtree - item 4");
+
+  gtk_tree_model_iter_previous(cmodel, &child);
+  check_col_str(cmodel, &child, "Child 2.1",
+                "should iterate backwards in subtree - item 3");
+
+  gtk_tree_model_iter_previous(cmodel, &child);
+  check_col_bool(cmodel, &child, TRUE,
+                "should iterate backwards in subtree - item 2 (separator)");
+
+  gtk_tree_model_iter_previous(cmodel, &child);
+  check_col_str(cmodel, &child, "Root 2",
+                "should iterate backwards in subtree - item 1 (header)");
+
+  check(!gtk_tree_model_iter_previous(cmodel, &child),
+        "should iterate backwards in subtree - no more items");
+
+
+  /*
    * Getting iter from path
    */
   path = gtk_tree_path_new_from_indices(2, -1);
@@ -360,6 +403,10 @@ main(int argc, char *argv[])
   check_col_bool(cmodel, &subchild, TRUE,
                 "should return iter from path - level 2 virtual");
   gtk_tree_path_free(path);
+
+  gtk_tree_model_iter_previous(cmodel, &subchild);
+  check_col_str(cmodel, &subchild, "Child 3.1",
+                "should return iter from path - level 2 virtual - iter_previous");
 
   path = gtk_tree_path_new_from_indices(4, -1);
   check(!gtk_tree_model_get_iter(cmodel, &top_level, path),
