@@ -17,6 +17,8 @@ struct _KGtk3ComboModel
 
 
 static void kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface);
+static void kgtk3_combo_model_dispose(GObject *object);
+
 static GtkTreeModelFlags kgtk3_combo_model_get_flags(GtkTreeModel *model);
 static gint kgtk3_combo_model_get_n_columns(GtkTreeModel *model);
 static GType kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index);
@@ -47,6 +49,8 @@ static
 void
 kgtk3_combo_model_class_init(KGtk3ComboModelClass *klass)
 {
+  GObjectClass *object_klass = G_OBJECT_CLASS(klass);
+  object_klass->dispose = kgtk3_combo_model_dispose;
 }
 
 
@@ -85,7 +89,18 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
   self->base_model = base_model;
   self->separator_column = gtk_tree_model_get_n_columns(base_model);
 
+  g_object_ref(base_model);
+
   return self;
+}
+
+
+static
+void
+kgtk3_combo_model_dispose(GObject *object)
+{
+  g_object_unref(KGTK3_COMBO_MODEL(object)->base_model);
+  G_OBJECT_CLASS(kgtk3_combo_model_parent_class)->dispose(object);
 }
 
 
