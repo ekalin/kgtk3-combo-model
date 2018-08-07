@@ -1,4 +1,4 @@
-AC_INIT([combo-header-model], [1.0.0])
+AC_INIT([kgtk3-combo-model], [1.0.0])
 AC_CONFIG_SRCDIR([src/kgtk3-combo-model.c])
 
 AC_CONFIG_MACRO_DIR([m4])
