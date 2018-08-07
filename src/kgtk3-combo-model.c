@@ -21,6 +21,7 @@ static GtkTreeModelFlags kgtk3_combo_model_get_flags(GtkTreeModel *model);
 static gint kgtk3_combo_model_get_n_columns(GtkTreeModel *model);
 static GType kgtk3_combo_model_get_column_type(GtkTreeModel *model, gint index);
 static gboolean kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *path);
+static GtkTreePath *kgtk3_combo_model_get_path(GtkTreeModel *model, GtkTreeIter *iter);
 static void kgtk3_combo_model_get_value(GtkTreeModel *model, GtkTreeIter *iter, gint column, GValue *value);
 static gboolean kgtk3_combo_model_iter_next(GtkTreeModel *model, GtkTreeIter *iter);
 static gboolean kgtk3_combo_model_iter_children(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent);
@@ -57,9 +58,7 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
   iface->get_n_columns = kgtk3_combo_model_get_n_columns;
   iface->get_column_type = kgtk3_combo_model_get_column_type;
   iface->get_iter = kgtk3_combo_model_get_iter;
-  /*
-  iface->get_path = gtk_tree_model_filter_get_path;
-  */
+  iface->get_path = kgtk3_combo_model_get_path;
   iface->get_value = kgtk3_combo_model_get_value;
   iface->iter_next = kgtk3_combo_model_iter_next;
   /*
@@ -171,6 +170,37 @@ kgtk3_combo_model_get_iter(GtkTreeModel *model, GtkTreeIter *iter, GtkTreePath *
 
 
 static
+GtkTreePath *
+kgtk3_combo_model_get_path(GtkTreeModel *model, GtkTreeIter *iter)
+{
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), NULL);
+
+  GtkTreePath *base_path = gtk_tree_model_get_path(KGTK3_COMBO_MODEL(model)->base_model, iter);
+  if (base_path == NULL) {
+    return NULL;
+  }
+
+  gint depth;
+  gint *indices = gtk_tree_path_get_indices_with_depth(base_path, &depth);
+
+  GtkTreePath *path = gtk_tree_path_new();
+  gtk_tree_path_append_index(path, indices[0]);
+  for (int i = 1; i < depth; ++i) {
+    gtk_tree_path_append_index(path, indices[i] + 2);
+  }
+  gtk_tree_path_free(base_path);
+
+  if (iter->user_data3 == TYPE_HEADER) {
+    gtk_tree_path_append_index(path, 0);
+  } else if (iter->user_data3 == TYPE_SEPARATOR) {
+    gtk_tree_path_append_index(path, 1);
+  }
+
+  return path;
+}
+
+
+static
 void
 kgtk3_combo_model_get_value(GtkTreeModel *model, GtkTreeIter *iter, gint column, GValue *value)
 {
@@ -181,7 +211,7 @@ kgtk3_combo_model_get_value(GtkTreeModel *model, GtkTreeIter *iter, gint column,
     g_value_init(value, G_TYPE_BOOLEAN);
     g_value_set_boolean(value, iter->user_data3 == TYPE_SEPARATOR);
   } else {
-    return gtk_tree_model_get_value(KGTK3_COMBO_MODEL(model)->base_model, iter, column, value);
+    return gtk_tree_model_get_value(cmodel->base_model, iter, column, value);
   }
 }
 

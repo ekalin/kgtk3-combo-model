@@ -37,6 +37,21 @@ void check_col_str(GtkTreeModel *model, GtkTreeIter *iter, const char *expected,
   g_free(value);
 }
 
+void check_path(GtkTreeModel *model, GtkTreeIter *iter, const char *expected, const char *msg)
+{
+  GtkTreePath *path = gtk_tree_model_get_path(model, iter);
+  if (path == NULL) {
+    printf("FAILED\n");
+    ++errors;
+    return;
+  }
+
+  gchar *path_str = gtk_tree_path_to_string(path);
+  check(strcmp(expected, path_str) == 0, msg);
+  gtk_tree_path_free(path);
+  g_free(path_str);
+}
+
 
 int
 main(int argc, char *argv[])
@@ -311,7 +326,7 @@ main(int argc, char *argv[])
 
 
   /*
-   * Getting iter from paths
+   * Getting iter from path
    */
   path = gtk_tree_path_new_from_indices(2, -1);
   gtk_tree_model_get_iter(cmodel, &top_level, path);
@@ -355,6 +370,33 @@ main(int argc, char *argv[])
   check(!gtk_tree_model_get_iter(cmodel, &top_level, path),
         "should return false for non existing path - level 1");
   gtk_tree_path_free(path);
+
+
+  /*
+   * Getting path from iter
+   */
+  gtk_tree_model_get_iter_first(cmodel, &top_level);
+  check_path(cmodel, &top_level, "0",
+             "should return path from iter - level 0");
+
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 1);
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 2);
+  check_path(cmodel, &child, "1:2",
+             "should return path from iter - level 1 regular");
+
+  gtk_tree_model_iter_previous(cmodel, &child);
+  check_path(cmodel, &child, "1:1",
+             "should return path from iter - level 1 separator");
+
+  gtk_tree_model_iter_nth_child(cmodel, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(cmodel, &child, &top_level, 2);
+  gtk_tree_model_iter_nth_child(cmodel, &subchild, &child, 1);
+  check_path(cmodel, &subchild, "2:2:1",
+             "should return path from iter - level 2 separator");
+
+  gtk_tree_model_iter_next(cmodel, &subchild);
+  check_path(cmodel, &subchild, "2:2:2",
+             "should return path from iter - level 2 regular");
 
 
   /*
