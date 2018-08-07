@@ -11,4 +11,9 @@ Glib::Object::Introspection->setup(
   package => 'KGtk3');
 
 
+sub get {
+  return Gtk3::TreeModel::get(@_);
+}
+
+
 1;
