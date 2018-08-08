@@ -1,4 +1,5 @@
 Makefile.PL
 MANIFEST
 lib/KGtk3/ComboModel.pm
+t/ComboModel.t
 example
