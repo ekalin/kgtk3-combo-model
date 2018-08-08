@@ -30,6 +30,74 @@
 
 #include "kgtk3-combo-model.h"
 
+/**
+ * SECTION: kgtk3combomodel
+ * @Title: KGtk3ComboModel
+ * @Short_description: Wrapper for GtkTreeModel to be used in combos
+ * when items with children need to be selected.
+ *
+ * Gtk+ 3.17.5 has removed the ability to select items in a
+ * GtkComboBox that have children. In Gtk+ 2 an extra item was added
+ * to the combos, allowing the parent item to be selected, but without
+ * those items in Gtk+ 3 items with children cannot be selected with
+ * the mouse.
+ *
+ * KGtk3ComboModel is a wrapper for GtkTreeModel that returns a view
+ * of the wrapped model with extra items just like Gtk+ 2 used to do.
+ *
+ * To use it, wrap your GtkTreeModel in KGtk3ComboModel with:
+ *
+ * |[<!-- language="C" -->
+ * GtkTreeModel *wrapped_model = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
+ * ]|
+ *
+ * and use `wrapped_model` in your combo. The wrapped model will
+ * include extra itens corresponding to the parent item and a
+ * separator.
+ *
+ * An extra boolean column is added after all the columns of the base
+ * model. This column is `TRUE` for the separator items, and should be
+ * used in a row separator function, something like this:
+ *
+ *
+ * |[<!-- language="C" -->
+ * gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+ * {
+ *   gboolean sep;
+ *   gtk_tree_model_get(model, iter, LAST_COLUM+1, &sep, -1);
+ *   return sep;
+ * }
+ * ...
+ * gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(combo),
+ *                                      is_separator, NULL, NULL);
+ * ]|
+ *
+ *
+ * ## Technical note
+ *
+ * KGtk3ComboModel uses `user_data3` in iterators to store its
+ * internal data. If the base model uses this field, it cannot be
+ * wrapped. None of the standard Gtk TreeModels use that field, so
+ * it's safe to wrap ListStore, TreeStore, TreeModelFilter and
+ * TreeModelSort.
+ */
+
+/*
+ * Technical note:
+ *
+ * Iterators are essentially a copy of a base model's iterator, only
+ * the user_data3 is used by KGtk3ComboModel as follows:
+ *
+ * - user_data3 == TYPE_REGULAR: Iter points to a regular item of the
+ *   base model.
+ *
+ * - user_data3 == TYPE_HEADER: Iter points to the virtual "header"
+ *   item that repeats the parent. The iter actually points to the
+ *   parent item in the base model.
+ *
+ * - user_data3 == TYPE_HEADER: Similar to the above, but for the
+ *   separator item.
+ */
 
 struct _KGtk3ComboModel
 {
@@ -108,6 +176,16 @@ kgtk3_combo_model_tree_model_init(GtkTreeModelIface *iface)
 }
 
 
+/**
+ * kgtk3_combo_model_new:
+ * @base_model: Base model
+ *
+ * Creates a new #KGtk3ComboModel-struct.
+ *
+ * A reference to the base model will be held by the #KGtk3ComboModel-struct.
+ *
+ * Returns: A newly-created #KGtk3ComboModel-struct.
+ */
 KGtk3ComboModel *
 kgtk3_combo_model_new(GtkTreeModel *base_model)
 {
