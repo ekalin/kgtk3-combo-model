@@ -53,5 +53,6 @@ fi
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-                 test/Makefile])
+                 test/Makefile
+                 kgtk3-combo-model-1.0.pc])
 AC_OUTPUT

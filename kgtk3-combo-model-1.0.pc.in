@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+
+Name: KGtkComboModel
+Description: Makes combos with tree models work like in GTK+ 2, allowing item with children to be selected
+Version: @VERSION@
+Requires: gtk+-3.0
+Libs: -L${libdir} -lkgtk3-combo-model-1.0
+Cflags: -I${includedir}

@@ -61,3 +61,6 @@ ltmain.sh
 # Instrospection output
 *.gir
 *.typelib
+
+# pkg-config output
+kgtk3-combo-model-1.0.pc
