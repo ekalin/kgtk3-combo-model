@@ -30,6 +30,7 @@ libkgtk3_combo_model_1_0_la_SOURCES = kgtk3-combo-model.c
 include_HEADERS = kgtk3-combo-model.h
 libkgtk3_combo_model_1_0_la_CPPFLAGS = $(GTK_CFLAGS)
 libkgtk3_combo_model_1_0_la_LIBADD = $(GTK_LIBS)
+libkgtk3_combo_model_1_0_la_LDFLAGS = -version-info $(LT_VERSION_INFO)
 
 
 -include $(INTROSPECTION_MAKEFILE)

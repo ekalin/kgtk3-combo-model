@@ -38,6 +38,17 @@ AC_PROG_CC
 LT_INIT
 AC_SUBST([LIBTOOL_DEPS])
 
+# Libtool versioning - only update before a public release.
+# If the code has changed at all: REVISION++.
+# If any interfaces have changed at all: CURRENT++, REVISION=0.
+# If any interfaces have been added since the last public release, AGE++
+# If any interfaces have been removed or changed since the last public release, AGE=0.
+CURRENT=0
+AGE=0
+REVISION=0
+LT_VERSION_INFO="$CURRENT:$REVISION:$AGE"
+AC_SUBST(LT_VERSION_INFO)
+
 PKG_CHECK_MODULES([GTK], [gtk+-3.0])
 AC_SUBST([GTK_CFLAGS])
 AC_SUBST([GTK_LIBS])
