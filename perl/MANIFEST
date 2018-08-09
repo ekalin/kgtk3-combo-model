@@ -30,3 +30,5 @@ MANIFEST
 lib/KGtk3/ComboModel.pm
 t/ComboModel.t
 example
+COPYING
+README.md
