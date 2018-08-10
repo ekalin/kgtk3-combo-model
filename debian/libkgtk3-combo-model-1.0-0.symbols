@@ -1,0 +1,3 @@
+libkgtk3-combo-model-1.0.so.0 libkgtk3-combo-model-1.0-0 #MINVER#
+ kgtk3_combo_model_get_type@Base 1.0.0
+ kgtk3_combo_model_new@Base 1.0.0
