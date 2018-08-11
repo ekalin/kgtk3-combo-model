@@ -1,0 +1,32 @@
+Source: libkgtk3-combo-model-1.0-perl
+Priority: optional
+Maintainer: Eduardo M KALINOWSKI <eduardo@kalinowski.com.br>
+Build-Depends: debhelper (>= 11),
+               gir1.2-kgtk3combomodel-1.0 <!nocheck>,
+               libgtk3-perl <!nocheck>,
+               libtest-class-perl <!nocheck>,
+               xauth <!nocheck>,
+               xvfb <!nocheck>
+Standards-Version: 4.2.0
+Section: perl
+Homepage: https://github.com/ekalin/kgtk3-combo-model
+Vcs-Browser: https://github.com/ekalin/kgtk3-combo-model/tree/master/perl/debian
+Vcs-Git: https://github.com/ekalin/kgtk3-combo-model.git
+
+Package: libkgtk3-combo-model-1.0-perl
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends: libkgtk3-combo-model-1.0-0,
+         gir1.2-kgtk3combomodel-1.0,
+         libgtk3-perl,
+         ${perl:Depends},
+         ${misc:Depends}
+Description: fix for GtkTreeModel in GtkCombo with GTK+ 3 - Perl bindings
+ GTK+ 3.17.5 has removed the ability to select items in a GtkComboBox that
+ have children. In GTK+ 2 an extra item was added to the combos, allowing
+ the parent item to be selected, but this was removed in GTK+ 3.
+ .
+ This package provides a wrapper for GtkTreeModel's that include extra
+ items such as those that used to be provided by GTK+ 2.
+ .
+ This package contains Perl bindings for the library.
