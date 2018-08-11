@@ -29,4 +29,5 @@
 *.trs
 test-suite.log
 
+test-combo-box
 test-combo-model

@@ -26,22 +26,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <stdio.h>
-
 #include <kgtk3-combo-model.h>
 
+#include "test-support.h"
 
-int errors = 0;
-void check(int result, const char *msg)
-{
-  printf("%s: ", msg);
-  if (result) {
-    printf("ok\n");
-  } else {
-    printf("FAILED\n");
-    ++errors;
-  }
-}
 
 void check_col_int(GtkTreeModel *model, GtkTreeIter *iter, gint expected, const char *msg)
 {
@@ -477,10 +465,5 @@ main(int argc, char *argv[])
   /*
    * End
    */
-  if (errors) {
-    printf("%d checks FAILED\n", errors);
-  } else {
-    printf("all checks passed\n");
-  }
-  return errors;
+  return finalize();
 }

@@ -25,7 +25,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-check_PROGRAMS = test-combo-model
+noinst_HEADERS = test-support.h
+
+check_PROGRAMS = test-combo-model \
+                 test-combo-box
 
 TESTS = $(check_PROGRAMS)
 
