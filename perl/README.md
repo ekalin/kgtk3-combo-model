@@ -19,12 +19,13 @@ You'll need KGtk3ComboModel built as a shared library and installed. You'll also
 
 ```perl
 my $base_model = Gtk3::TreeStore->new(...)
-my $model = KGtk3::ComboModel->new($model);
+my $model = KGtk3::ComboModel->new($base_model);
 
 my $combo = Gtk3::ComboBox->new_with_model($model);
+my $sep_col = $model->get_separator_column();
 $combo->set_row_separator_func(sub {
     my ($model, $iter) = @_;
-    return $model->get($iter, LAST_COLUMN+1);
+    return $model->get($iter, $sep_col);
   });
 ```
 

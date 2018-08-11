@@ -210,6 +210,20 @@ kgtk3_combo_model_dispose(GObject *object)
 }
 
 
+/**
+ * kgtk3_combo_model_get_separator_column:
+ * @model: A #KGtk3ComboModel-struct
+ *
+ * Returns: The index of the column indicating whether a row is a
+ * separator.
+ */
+gint
+kgtk3_combo_model_get_separator_column(KGtk3ComboModel *model)
+{
+  return model->separator_column;
+}
+
+
 static
 GtkTreeModelFlags
 kgtk3_combo_model_get_flags(GtkTreeModel *model)

@@ -72,9 +72,10 @@ void on_changed(GtkComboBox *widget, gpointer data)
 
 gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-  gboolean sep;
-  gtk_tree_model_get(model, iter, 1, &sep, -1);
-  return sep;
+  gint sep_col = kgtk3_combo_model_get_separator_column(KGTK3_COMBO_MODEL(model));
+  gboolean is_sep;
+  gtk_tree_model_get(model, iter, sep_col, &is_sep, -1);
+  return is_sep;
 }
 
 

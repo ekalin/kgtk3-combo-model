@@ -159,6 +159,8 @@ main(int argc, char *argv[])
         "should return existing column type (column 1)");
   check(gtk_tree_model_get_column_type(cmodel, 2) == G_TYPE_BOOLEAN,
         "should return boolean type for last column");
+  check(kgtk3_combo_model_get_separator_column(cmodel_k) == 2,
+        "should return index of separator column");
 
   /*
    * Existence and number of children

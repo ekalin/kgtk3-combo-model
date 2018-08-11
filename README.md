@@ -44,9 +44,10 @@ An extra boolean column is added after all the columns of the base model. This c
 ```c
 gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
 {
-  gboolean sep;
-  gtk_tree_model_get(model, iter, LAST_COLUM+1, &sep, -1);
-  return sep;
+  gint sep_col = kgtk3_combo_model_get_separator_column(KGTK3_COMBO_MODEL(model));
+  gboolean is_sep;
+  gtk_tree_model_get(model, iter, sep_col, &is_sep, -1);
+  return is_sep;
 }
 
 ...
@@ -55,7 +56,7 @@ gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(combo),
                                      is_separator, NULL, NULL);
 ```
 
-For a complete example, see (src/example.c)
+For a complete example, see (src/example-model.c)
 
 
 ## Perl binding

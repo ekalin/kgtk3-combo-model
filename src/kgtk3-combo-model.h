@@ -37,6 +37,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE(KGtk3ComboModel, kgtk3_combo_model, KGTK3, COMBO_MODEL, GObject)
 
 KGtk3ComboModel *kgtk3_combo_model_new(GtkTreeModel *base_model);
+gint kgtk3_combo_model_get_separator_column(KGtk3ComboModel *model);
 
 G_END_DECLS
 

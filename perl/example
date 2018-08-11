@@ -77,9 +77,10 @@ sub create_combo {
   $combo->pack_start($column, 1);
   $combo->set_attributes($column, "text", 1);
 
+  my $sep_col = $model->get_separator_column();
   $combo->set_row_separator_func(sub {
     my ($model, $iter) = @_;
-    return $model->get($iter, 2);
+    return $model->get($iter, $sep_col);
   });
 
   return $combo;

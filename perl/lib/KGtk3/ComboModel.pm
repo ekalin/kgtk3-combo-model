@@ -41,12 +41,13 @@ KGtk3ComboModel - Makes combos with tree models work like in GTK+ 2, allowing it
   use KGtk3::ComboModel;
 
   my $base_model = Gtk3::TreeStore->new(...)
-  my $model = KGtk3::ComboModel->new($model);
+  my $model = KGtk3::ComboModel->new($base_model);
 
   my $combo = Gtk3::ComboBox->new_with_model($model);
+  my $sep_col = $model->get_separator_column();
   $combo->set_row_separator_func(sub {
       my ($model, $iter) = @_;
-      return $model->get($iter, LAST_COLUMN+1);
+      return $model->get($iter, $sep_col);
     });
 
 =head1 DESCRIPTION
