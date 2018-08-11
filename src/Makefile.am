@@ -26,8 +26,10 @@
 # SUCH DAMAGE.
 
 lib_LTLIBRARIES = libkgtk3-combo-model-1.0.la
-libkgtk3_combo_model_1_0_la_SOURCES = kgtk3-combo-model.c
-include_HEADERS = kgtk3-combo-model.h
+libkgtk3_combo_model_1_0_la_SOURCES = kgtk3-combo-model.c \
+                                      kgtk3-combo-box.c
+include_HEADERS = kgtk3-combo-model.h \
+                  kgtk3-combo-box.h
 libkgtk3_combo_model_1_0_la_CPPFLAGS = $(GTK_CFLAGS)
 libkgtk3_combo_model_1_0_la_LIBADD = $(GTK_LIBS)
 libkgtk3_combo_model_1_0_la_LDFLAGS = -version-info $(LT_VERSION_INFO)
@@ -59,7 +61,13 @@ typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 CLEANFILES = $(gir_DATA) $(typelib_DATA)
 endif
 
-noinst_PROGRAMS = example
-example_SOURCES = example.c
-example_CPPFLAGS = $(GTK_CFLAGS)
-example_LDADD = libkgtk3-combo-model-1.0.la $(GTK_LIBS)
+
+noinst_PROGRAMS = example-model example-combo
+
+example_model_SOURCES = example-model.c
+example_model_CPPFLAGS = $(GTK_CFLAGS)
+example_model_LDADD = libkgtk3-combo-model-1.0.la $(GTK_LIBS)
+
+example_combo_SOURCES = example-combo.c
+example_combo_CPPFLAGS = $(GTK_CFLAGS)
+example_combo_LDADD = libkgtk3-combo-model-1.0.la $(GTK_LIBS)
