@@ -60,4 +60,4 @@ For a complete example, see (src/example.c)
 
 ## Perl binding
 
-The (perl) subdirectory includes bindings allowing `KGtk3ComboModel` to be used in Perl programs.
+The [perl/](perl) subdirectory includes bindings allowing `KGtk3ComboModel` to be used in Perl programs.
