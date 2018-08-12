@@ -37,7 +37,20 @@ main(int argc, char *argv[])
   /*
    * Set up
    */
+  GtkWidget *combo;
+  GtkTreeModel *model_from_combo;
+
   gtk_init(&argc, &argv);
+
+  GtkTreeIter top_level;
+  GtkTreeStore *model_store = gtk_tree_store_new(2,
+                                                 G_TYPE_INT,
+                                                 G_TYPE_STRING);
+  gtk_tree_store_append(model_store, &top_level, NULL);
+  gtk_tree_store_set(model_store, &top_level,
+                     0, 1,
+                     1, "Root 1", -1);
+  GtkTreeModel *model = GTK_TREE_MODEL(model_store);
 
 
   /*
@@ -49,6 +62,23 @@ main(int argc, char *argv[])
   GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   check(kgtk3_combo_box_new_with_model((GtkTreeModel *) window) == NULL,
         "should fail when new_with_model receives an invalid object");
+
+
+  /*
+   * Model on construction
+   */
+  combo = kgtk3_combo_box_new_with_model(model);
+  model_from_combo = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+  check(KGTK3_IS_COMBO_MODEL(model_from_combo),
+        "should wrap the model on a KGtk3ComboModel on construction");
+
+
+  /*
+   * Row separator function
+   */
+  combo = kgtk3_combo_box_new_with_model(model);
+  check(gtk_combo_box_get_row_separator_func(GTK_COMBO_BOX(combo)) != NULL,
+        "should set row separator function");
 
 
   /*

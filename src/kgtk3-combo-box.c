@@ -88,6 +88,9 @@ struct _KGtk3ComboBox
 };
 
 
+static gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
+
+
 G_DEFINE_TYPE(KGtk3ComboBox, kgtk3_combo_box, GTK_TYPE_COMBO_BOX)
 
 
@@ -120,7 +123,24 @@ kgtk3_combo_box_new_with_model(GtkTreeModel *model)
 {
   g_return_val_if_fail(GTK_IS_TREE_MODEL(model), NULL);
 
-  KGtk3ComboBox *self = g_object_new(KGTK3_TYPE_COMBO_BOX, "model", model, NULL);
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
+
+  KGtk3ComboBox *self = g_object_new(KGTK3_TYPE_COMBO_BOX, "model", cmodel, NULL);
+
+  gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(self),
+                                       is_separator, NULL, NULL);
 
   return GTK_WIDGET(self);
+}
+
+
+static gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+{
+  g_return_val_if_fail(KGTK3_IS_COMBO_MODEL(model), FALSE);
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(model);
+  gint separator_column = kgtk3_combo_model_get_separator_column(cmodel);
+
+  gboolean is_separator;
+  gtk_tree_model_get(model, iter, separator_column, &is_separator, -1);
+  return is_separator;
 }
