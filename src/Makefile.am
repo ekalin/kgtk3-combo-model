@@ -39,6 +39,9 @@ catalog_DATA = kgtk3-combo-model.glade.xml
 
 EXTRA_DIST = $(catalog_DATA)
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = kgtk3-combo-model-1.0.pc
+
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =

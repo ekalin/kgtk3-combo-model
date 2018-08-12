@@ -30,12 +30,8 @@ SUBDIRS = src test
 libtool: $(LIBTOOL_DEPS)
 	$(SHELL) ./config.status libtool
 
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = kgtk3-combo-model-1.0.pc
-
 EXTRA_DIST = README.md gtk2.png gtk3.png \
              autogen.sh \
-             kgtk3-combo-model-1.0.pc.in \
              perl/lib/KGtk3/ComboModel.pm \
              perl/t/ComboModel.t \
              perl/example \
