@@ -103,6 +103,27 @@ main(int argc, char *argv[])
 
 
   /*
+   * Created via ui-builder
+   */
+  const char *ui_xml = \
+"<interface>" \
+"  <object class=\"KGtk3ComboBox\" id=\"combo\">" \
+"    <property name=\"model\">model</property>" \
+"  </object>" \
+"  <object class=\"GtkTreeStore\" id=\"model\">" \
+"    <columns>" \
+"      <column type=\"gchar\"/>" \
+"    </columns>" \
+"  </object>" \
+"</interface>";
+  GtkBuilder *builder = gtk_builder_new_from_string(ui_xml, -1);
+  combo = GTK_WIDGET(gtk_builder_get_object(builder, "combo"));
+  model_from_combo = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+  check(KGTK3_IS_COMBO_MODEL(model_from_combo),
+        "should be buildable with gtk_ui_builder");
+
+
+  /*
    * Row separator function
    */
   combo = kgtk3_combo_box_new_with_model(model);
