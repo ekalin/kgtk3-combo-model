@@ -34,6 +34,11 @@ libkgtk3_combo_model_1_0_la_CPPFLAGS = $(GTK_CFLAGS)
 libkgtk3_combo_model_1_0_la_LIBADD = $(GTK_LIBS)
 libkgtk3_combo_model_1_0_la_LDFLAGS = -version-info $(LT_VERSION_INFO)
 
+catalogdir = $(datadir)/glade/catalogs
+catalog_DATA = kgtk3-combo-model.glade.xml
+
+EXTRA_DIST = $(catalog_DATA)
+
 
 -include $(INTROSPECTION_MAKEFILE)
 INTROSPECTION_GIRS =
