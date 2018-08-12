@@ -38,6 +38,8 @@ G_DECLARE_FINAL_TYPE(KGtk3ComboBox, kgtk3_combo_box, KGTK3, COMBO_BOX, GtkComboB
 
 GtkWidget *kgtk3_combo_box_new();
 GtkWidget *kgtk3_combo_box_new_with_model(GtkTreeModel *model);
+GtkWidget *kgtk3_combo_box_new_with_entry();
+GtkWidget *kgtk3_combo_box_new_with_model_and_entry(GtkTreeModel *model);
 
 void kgtk3_combo_box_set_model(KGtk3ComboBox *combo, GtkTreeModel *model);
 

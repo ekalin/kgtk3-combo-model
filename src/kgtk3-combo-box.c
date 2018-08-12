@@ -211,6 +211,43 @@ kgtk3_combo_box_new_with_model(GtkTreeModel *model)
 
 
 /**
+ * kgtk3_combo_box_new_with_entry:
+ *
+ * Creates a new #KGtk3ComboBox-struct with an entry.
+ *
+ * Returns: A newly-created #KGtk3ComboBox-struct.
+ */
+GtkWidget *
+kgtk3_combo_box_new_with_entry()
+{
+  return GTK_WIDGET(g_object_new(KGTK3_TYPE_COMBO_BOX, "has-entry", TRUE, NULL));
+}
+
+
+
+/**
+ * kgtk3_combo_box_new_with_model_and_entry:
+ * @model: A GtkTreeModel
+ *
+ * Creates a new #KGtk3ComboBox-struct with an entry.
+ *
+ * The model will be wrapped in a #KGtk3ComboModel-struct.
+ *
+ * Returns: A newly-created #KGtk3ComboBox-struct.
+ */
+GtkWidget *
+kgtk3_combo_box_new_with_model_and_entry(GtkTreeModel *model)
+{
+  g_return_val_if_fail(GTK_IS_TREE_MODEL(model), NULL);
+
+  return GTK_WIDGET(g_object_new(KGTK3_TYPE_COMBO_BOX,
+                                 "has-entry", TRUE,
+                                 "model", model,
+                                 NULL));
+}
+
+
+/**
  * kgtk3_combo_box_set_model:
  * @combo: A #KGtk3ComboBox-struct
  * @model: A GtkTreeModel
