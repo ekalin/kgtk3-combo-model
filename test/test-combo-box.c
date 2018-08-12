@@ -89,6 +89,20 @@ main(int argc, char *argv[])
 
 
   /*
+   * Model via property
+   */
+  combo = kgtk3_combo_box_new();
+  g_object_set(combo, "model", model, NULL);
+  model_from_combo = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+  check(KGTK3_IS_COMBO_MODEL(model_from_combo),
+        "should wrap the model on a KGtk3ComboModel on set 'model' property");
+
+  g_object_get(combo, "model", &model2, NULL);
+  check(model2 == model_from_combo,
+        "should return same model from 'model' property and get_model");
+
+
+  /*
    * Row separator function
    */
   combo = kgtk3_combo_box_new_with_model(model);

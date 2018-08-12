@@ -88,6 +88,14 @@ struct _KGtk3ComboBox
   GtkTreeModel *base_model;
 };
 
+enum {
+  PROP_0,
+  PROP_MODEL,
+};
+
+
+static void kgtk3_combo_box_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec);
+static void kgtk3_combo_box_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec);
 
 static gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
 
@@ -99,6 +107,8 @@ static
 void
 kgtk3_combo_box_init(KGtk3ComboBox *combo_box)
 {
+  gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(combo_box),
+                                       is_separator, NULL, NULL);
 }
 
 
@@ -106,6 +116,64 @@ static
 void
 kgtk3_combo_box_class_init(KGtk3ComboBoxClass *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS(klass);
+
+  object_class->set_property = kgtk3_combo_box_set_property;
+  object_class->get_property = kgtk3_combo_box_get_property;
+
+  /**
+   * GtkComboBox:model:
+   *
+   * The model from which the combo box takes the values shown
+   * in the list.
+   *
+   * When setting a model, it is wrapped in a #KGtk3ComboModel-struct,
+   * but when getting the model, the wrapped model is returned.
+   */
+  g_object_class_install_property(
+    object_class,
+    PROP_MODEL,
+    g_param_spec_object("model",
+                        "ComboBox model",
+                        "The model for the combo box",
+                        GTK_TYPE_TREE_MODEL,
+                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY));
+}
+
+
+static
+void
+kgtk3_combo_box_set_property(GObject *object, guint prop_id, const GValue *value, GParamSpec *pspec)
+{
+  KGtk3ComboBox *combo = KGTK3_COMBO_BOX(object);
+
+  switch (prop_id) {
+  case PROP_MODEL:
+    kgtk3_combo_box_set_model(combo, g_value_get_object(value));
+    break;
+
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+    break;
+  }
+}
+
+
+static
+void
+kgtk3_combo_box_get_property(GObject *object, guint prop_id, GValue *value, GParamSpec *pspec)
+{
+  KGtk3ComboBox *combo = KGTK3_COMBO_BOX(object);
+
+  switch (prop_id) {
+  case PROP_MODEL:
+    g_value_set_object(value, gtk_combo_box_get_model(GTK_COMBO_BOX(combo)));
+    break;
+
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID(object, prop_id, pspec);
+    break;
+  }
 }
 
 
@@ -138,14 +206,7 @@ kgtk3_combo_box_new_with_model(GtkTreeModel *model)
 {
   g_return_val_if_fail(GTK_IS_TREE_MODEL(model), NULL);
 
-  GtkTreeModel *cmodel = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
-
-  KGtk3ComboBox *self = g_object_new(KGTK3_TYPE_COMBO_BOX, "model", cmodel, NULL);
-
-  gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(self),
-                                       is_separator, NULL, NULL);
-
-  return GTK_WIDGET(self);
+  return GTK_WIDGET(g_object_new(KGTK3_TYPE_COMBO_BOX, "model", model, NULL));
 }
 
 
@@ -177,6 +238,8 @@ kgtk3_combo_box_set_model(KGtk3ComboBox *combo, GtkTreeModel *model)
   combo->base_model = model;
   GtkTreeModel *cmodel = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
   gtk_combo_box_set_model(GTK_COMBO_BOX(combo), cmodel);
+
+  g_object_notify(G_OBJECT(combo), "model");
 }
 
 
