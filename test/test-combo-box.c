@@ -38,7 +38,7 @@ main(int argc, char *argv[])
    * Set up
    */
   GtkWidget *combo;
-  GtkTreeModel *model_from_combo;
+  GtkTreeModel *model_from_combo, *model2;
 
   gtk_init(&argc, &argv);
 
@@ -71,6 +71,21 @@ main(int argc, char *argv[])
   model_from_combo = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
   check(KGTK3_IS_COMBO_MODEL(model_from_combo),
         "should wrap the model on a KGtk3ComboModel on construction");
+
+
+  /*
+   * Model via set_model
+   */
+  combo = kgtk3_combo_box_new();
+  kgtk3_combo_box_set_model(KGTK3_COMBO_BOX(combo), model);
+  model_from_combo = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+  check(KGTK3_IS_COMBO_MODEL(model_from_combo),
+        "should wrap the model on a KGtk3ComboModel on set_model");
+
+  kgtk3_combo_box_set_model(KGTK3_COMBO_BOX(combo), model);
+  model2 = gtk_combo_box_get_model(GTK_COMBO_BOX(combo));
+  check(model2 == model_from_combo,
+        "should keep the same wrapped model if set_model is called with the same base model");
 
 
   /*

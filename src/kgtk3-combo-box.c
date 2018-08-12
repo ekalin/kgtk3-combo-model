@@ -85,6 +85,7 @@
 struct _KGtk3ComboBox
 {
   GtkComboBox   parent_instance;
+  GtkTreeModel *base_model;
 };
 
 
@@ -105,6 +106,20 @@ static
 void
 kgtk3_combo_box_class_init(KGtk3ComboBoxClass *klass)
 {
+}
+
+
+/**
+ * kgtk3_combo_box_new:
+ *
+ * Creates a new #KGtk3ComboBox-struct.
+ *
+ * Returns: A newly-created #KGtk3ComboBox-struct.
+ */
+GtkWidget *
+kgtk3_combo_box_new()
+{
+  return g_object_new(KGTK3_TYPE_COMBO_BOX, NULL);
 }
 
 
@@ -132,6 +147,38 @@ kgtk3_combo_box_new_with_model(GtkTreeModel *model)
 
   return GTK_WIDGET(self);
 }
+
+
+/**
+ * kgtk3_combo_box_set_model:
+ * @combo: A #KGtk3ComboBox-struct
+ * @model: A GtkTreeModel
+ *
+ * Sets the model used by @combo_box to be @model. Will unset a
+ * previously set model (if applicable). If model is %NULL, then it
+ * will unset the model.
+ *
+ * Note that this function does not clear the cell renderers, you have
+ * to call gtk_cell_layout_clear() yourself if you need to set up
+ * different cell renderers for the new model.
+ *
+ * The model will be wrapped in a #KGtk3ComboModel-struct.
+ */
+void
+kgtk3_combo_box_set_model(KGtk3ComboBox *combo, GtkTreeModel *model)
+{
+  g_return_if_fail(KGTK3_IS_COMBO_BOX(combo));
+  g_return_if_fail(GTK_IS_TREE_MODEL(model));
+
+  if (model == combo->base_model) {
+    return;
+  }
+
+  combo->base_model = model;
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
+  gtk_combo_box_set_model(GTK_COMBO_BOX(combo), cmodel);
+}
+
 
 
 static gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
