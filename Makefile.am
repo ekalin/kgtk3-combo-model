@@ -33,7 +33,7 @@ libtool: $(LIBTOOL_DEPS)
 EXTRA_DIST = README.md gtk2.png gtk3.png \
              autogen.sh \
              perl/lib/KGtk3/ComboModel.pm \
-             perl/t/ComboModel.t \
+             perl/t/*.t \
              perl/example-combo \
              perl/example-model \
              perl/MANIFEST \

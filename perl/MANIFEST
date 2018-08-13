@@ -30,6 +30,7 @@ MANIFEST
 MANIFEST.SKIP
 lib/KGtk3/ComboModel.pm
 t/ComboModel.t
+t/ComboBox.t
 example-combo
 example-model
 COPYING
