@@ -34,7 +34,7 @@
 /**
  * SECTION: kgtk3combomodel
  * @Title: KGtk3ComboBox
- * @Short_description: TODO
+ * @Short_description: Combo box allowing items with children to be selected.
  *
  * Gtk+ 3.17.5 has removed the ability to select items in a
  * GtkComboBox that have children. In Gtk+ 2 an extra item was added
@@ -42,44 +42,29 @@
  * those items in Gtk+ 3 items with children cannot be selected with
  * the mouse.
  *
- * KGtk3ComboModel is a wrapper for GtkTreeModel that returns a view
- * of the wrapped model with extra items just like Gtk+ 2 used to do.
+ * KGtk3ComboBox is a subclass of GtkComboBox that wraps its model in
+ * a #KGtk3ComboModel-struct and sets up a row separator function
+ * automatically.
  *
- * To use it, wrap your GtkTreeModel in KGtk3ComboModel with:
+ * To use it, just replace your GtkComboBox with KGtk3ComboBox. Since
+ * it's a subclass, all methods of GtkComboBox still work.
  *
- * |[<!-- language="C" -->
- * GtkTreeModel *wrapped_model = GTK_TREE_MODEL(kgtk3_combo_model_new(model));
- * ]|
- *
- * and use `wrapped_model` in your combo. The wrapped model will
- * include extra itens corresponding to the parent item and a
- * separator.
- *
- * An extra boolean column is added after all the columns of the base
- * model. This column is `TRUE` for the separator items, and should be
- * used in a row separator function, something like this:
- *
- *
- * |[<!-- language="C" -->
- * gboolean is_separator(GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
- * {
- *   gboolean sep;
- *   gtk_tree_model_get(model, iter, LAST_COLUM+1, &sep, -1);
- *   return sep;
- * }
- * ...
- * gtk_combo_box_set_row_separator_func(GTK_COMBO_BOX(combo),
- *                                      is_separator, NULL, NULL);
- * ]|
- *
+ * Note that the model used by the combo is not the model supplied in
+ * the constructor or with kgtk3_combo_box_set_model(), but a
+ * #KGtk3ComboModel-struct. For basic operations such as getting data
+ * from the current iter, using the original model should work. But if
+ * you want to do other operations (such as moving the iter around),
+ * you should get the wrapped model (use the standard
+ * gtk_combo_box_get_model() function) and use that instead of the
+ * original model.
  *
  * ## Technical note
  *
- * KGtk3ComboModel uses `user_data3` in iterators to store its
- * internal data. If the base model uses this field, it cannot be
- * wrapped. None of the standard Gtk TreeModels use that field, so
- * it's safe to wrap ListStore, TreeStore, TreeModelFilter and
- * TreeModelSort.
+ * #KGtk3ComboModel-struct (used internally by KGtk3ComboBox) uses
+ * `user_data3` in iterators to store its internal data. If the base
+ * model uses this field, it cannot be wrapped. None of the standard
+ * Gtk TreeModels use that field, so it's safe to wrap ListStore,
+ * TreeStore, TreeModelFilter and TreeModelSort.
  */
 
 struct _KGtk3ComboBox

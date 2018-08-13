@@ -33,9 +33,21 @@ our $VERSION = '1.0.0';
 
 =head1 NAME
 
-KGtk3ComboModel - Makes combos with tree models work like in GTK+ 2, allowing item with children to be selected
+KGtk3::ComboModel - Makes combos with tree models work like in GTK+ 2, allowing item with children to be selected
 
 =head1 SYNOPSYS
+
+You can just replace `Gtk3::ComboBox` with `KGtk3::ComboBox`:
+
+  use Gtk3 -init;
+  use KGtk3::ComboModel;
+
+  # Replace Gtk3::ComboBox with this
+  my $combo = KGtk3::ComboBox->new_with_model($model)
+
+and use the combo normally.
+
+If you need more control, you can wrap the model manually:
 
   use Gtk3 -init;
   use KGtk3::ComboModel;
@@ -58,10 +70,23 @@ to the combos, allowing the parent item to be selected, but without
 those items in Gtk+ 3 items with children cannot be selected with
 the mouse.
 
-KGtk3ComboModel is a wrapper for GtkTreeModel that returns a view
+KGtk3::ComboModel is a wrapper for Gtk3::TreeModel that returns a view
 of the wrapped model with extra items just like Gtk+ 2 used to do.
 
-To use it, wrap your GtkTreeModel in KGtk3ComboModel with:
+KGtk3::ComboBox is a drop-in replacement for Gtk3::ComboBox that wraps
+its model in a KGtk3::ComboModel automatically. In most cases you can
+just replace your combos with this subclass and everything should work
+normally.
+
+Note that the model used by the combo is not the model supplied in the
+constructor or with `->set_model()`, but a `KGtk3::ComboModel` (see
+below). For basic operations such as getting data from the current
+iter, using the original model should work. But if you want to do
+other operations (such as moving the iter around), you should get the
+wrapped model (just use `->get_model()`) and use that instead of the
+original model.
+
+If necessary, you can wrap your Gtk3::TreeModel in KGtk3::ComboModel with:
 
   my $wrapped_model = KGtk3::ComboModel->new($model)
 
@@ -80,7 +105,7 @@ used in a row separator function, something like this:
 
 =head1 TECHNICAL NOTE
 
-KGtk3ComboModel uses C<user_data3> in iterators to store its
+KGtk3::ComboModel uses C<user_data3> in iterators to store its
 internal data. If the base model uses this field, it cannot be
 wrapped. None of the standard Gtk TreeModels use that field, so
 it's safe to wrap ListStore, TreeStore, TreeModelFilter and

@@ -17,7 +17,19 @@ You'll need KGtk3ComboModel built as a shared library and installed. You'll also
 
 ## Usage
 
+You can just replace `Gtk3::ComboBox` with `KGtk3::ComboBox`:
+
 ```perl
+use KGtk3::ComboModel;
+
+my $combo = KGtk3::ComboBox->new_with_model($model)
+```
+
+If you need more control, you can wrap the model manually:
+
+```perl
+use KGtk3::ComboModel;
+
 my $base_model = Gtk3::TreeStore->new(...)
 my $model = KGtk3::ComboModel->new($base_model);
 
