@@ -29,7 +29,7 @@ package KGtk3::ComboModel;
 use strict;
 use warnings;
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.1.0';
 
 =head1 NAME
 

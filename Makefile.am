@@ -37,6 +37,7 @@ EXTRA_DIST = README.md gtk2.png gtk3.png \
              perl/example-combo \
              perl/example-model \
              perl/MANIFEST \
+             perl/MANIFEST.SKIP \
              perl/COPYING \
              perl/Makefile.PL \
              perl/README.md

@@ -25,7 +25,7 @@ dnl LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 dnl OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 dnl SUCH DAMAGE.
 
-AC_INIT([kgtk3-combo-model], [1.0.0])
+AC_INIT([kgtk3-combo-model], [1.1.0])
 AC_CONFIG_SRCDIR([src/kgtk3-combo-model.c])
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -43,8 +43,8 @@ AC_SUBST([LIBTOOL_DEPS])
 # If any interfaces have changed at all: CURRENT++, REVISION=0.
 # If any interfaces have been added since the last public release, AGE++
 # If any interfaces have been removed or changed since the last public release, AGE=0.
-CURRENT=0
-AGE=0
+CURRENT=1
+AGE=1
 REVISION=0
 LT_VERSION_INFO="$CURRENT:$REVISION:$AGE"
 AC_SUBST(LT_VERSION_INFO)
