@@ -1,3 +1,10 @@
 libkgtk3-combo-model-1.0.so.0 libkgtk3-combo-model-1.0-0 #MINVER#
+ kgtk3_combo_box_get_type@Base 1.1.0
+ kgtk3_combo_box_new@Base 1.1.0
+ kgtk3_combo_box_new_with_entry@Base 1.1.0
+ kgtk3_combo_box_new_with_model@Base 1.1.0
+ kgtk3_combo_box_new_with_model_and_entry@Base 1.1.0
+ kgtk3_combo_box_set_model@Base 1.1.0
+ kgtk3_combo_model_get_separator_column@Base 1.1.0
  kgtk3_combo_model_get_type@Base 1.0.0
  kgtk3_combo_model_new@Base 1.0.0
