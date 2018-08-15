@@ -83,10 +83,23 @@ sub create_combo {
 my $window = Gtk3::Window->new('toplevel');
 $window->signal_connect(delete_event => sub { Gtk3::main_quit() });
 
+my $grid = Gtk3::Grid->new();
+$grid->set(orientation => 'vertical');
+$grid->set_row_spacing(8);
+
 my $model = create_model();
 my $combo = create_combo($model);
+$grid->add($combo);
 
-$window->add($combo);
+my $count = 0;
+my $button = Gtk3::Button->new_with_label('Add item');
+$button->signal_connect(clicked => sub {
+    my $iter = $model->append(undef);
+    $model->set($iter, 0 => $count++, 1=> "New item " . $count);
+  });
+$grid->add($button);
+
+$window->add($grid);
 
 $window->show_all();
 Gtk3::main();
