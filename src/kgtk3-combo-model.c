@@ -491,6 +491,13 @@ on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_it
   kgtk3_combo_model_get_iter(cmodel, &iter, path);
 
   gtk_tree_model_row_changed(cmodel, path, &iter);
+
+  if (gtk_tree_model_iter_has_child(model, base_iter)) {
+    gtk_tree_path_append_index(path, 0);
+    kgtk3_combo_model_get_iter(cmodel, &iter, path);
+    gtk_tree_model_row_changed(cmodel, path, &iter);
+  }
+
   gtk_tree_path_free(path);
 }
 
