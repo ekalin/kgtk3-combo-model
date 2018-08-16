@@ -104,6 +104,8 @@ struct _KGtk3ComboModel
   GObject       parent_instance;
   GtkTreeModel *base_model;
   gint          separator_column;
+
+  gulong        row_changed_id;
 };
 
 #define TYPE_REGULAR   GINT_TO_POINTER(0)
@@ -127,6 +129,8 @@ static gboolean kgtk3_combo_model_iter_has_child(GtkTreeModel *model, GtkTreeIte
 static gint kgtk3_combo_model_iter_n_children(GtkTreeModel *model, GtkTreeIter *iter);
 static gboolean kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent, gint n);
 static gboolean kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *child);
+
+static void on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -195,6 +199,9 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
   self->base_model = base_model;
   self->separator_column = gtk_tree_model_get_n_columns(base_model);
 
+  self->row_changed_id = g_signal_connect(base_model, "row-changed",
+                                          G_CALLBACK(on_row_changed), self);
+
   g_object_ref(base_model);
 
   return self;
@@ -205,7 +212,12 @@ static
 void
 kgtk3_combo_model_dispose(GObject *object)
 {
-  g_object_unref(KGTK3_COMBO_MODEL(object)->base_model);
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(object);
+
+  g_signal_handler_disconnect(cmodel->base_model, cmodel->row_changed_id);
+
+  g_object_unref(cmodel->base_model);
+
   G_OBJECT_CLASS(kgtk3_combo_model_parent_class)->dispose(object);
 }
 
@@ -455,3 +467,14 @@ kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIte
     return ret;
   }
 }
+
+
+static
+void
+on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(data);
+
+  gtk_tree_model_row_changed(GTK_TREE_MODEL(cmodel), path, iter);
+}
+

@@ -79,49 +79,8 @@ main(int argc, char *argv[])
   GtkTreePath *path;
 
   gtk_init(&argc, &argv);
-  GtkTreeStore *model_store = gtk_tree_store_new(2,
-                                                 G_TYPE_INT,
-                                                 G_TYPE_STRING);
 
-  gtk_tree_store_append(model_store, &top_level, NULL);
-  gtk_tree_store_set(model_store, &top_level,
-                     0, 1,
-                     1, "Root 1", -1);
-
-  gtk_tree_store_append(model_store, &top_level, NULL);
-  gtk_tree_store_set(model_store, &top_level,
-                     0, 10,
-                     1, "Root 2", -1);
-  gtk_tree_store_append(model_store, &child, &top_level);
-  gtk_tree_store_set(model_store, &child,
-                     0, 11,
-                     1, "Child 2.1", -1);
-  gtk_tree_store_append(model_store, &child, &top_level);
-  gtk_tree_store_set(model_store, &child,
-                     0, 23,
-                     1, "Child 2.2", -1);
-  gtk_tree_store_append(model_store, &child, &top_level);
-  gtk_tree_store_set(model_store, &child,
-                     0, 30,
-                     1, "Child 2.3", -1);
-
-  gtk_tree_store_append(model_store, &top_level, NULL);
-  gtk_tree_store_set(model_store, &top_level,
-                     0, 5,
-                     1, "Root 3", -1);
-  gtk_tree_store_append(model_store, &child, &top_level);
-  gtk_tree_store_set(model_store, &child,
-                     0, 6,
-                     1, "Child 3.1", -1);
-  gtk_tree_store_append(model_store, &subchild, &child);
-  gtk_tree_store_set(model_store, &subchild,
-                     0, 16,
-                     1, "Child 3.1.1", -1);
-  gtk_tree_store_append(model_store, &child, &top_level);
-  gtk_tree_store_set(model_store, &child,
-                     0, 7,
-                     1, "Child 3.2", -1);
-
+  GtkTreeStore *model_store = create_model();
   GtkTreeModel *model = GTK_TREE_MODEL(model_store);
   KGtk3ComboModel *cmodel_k = kgtk3_combo_model_new(model);
   GtkTreeModel *cmodel = GTK_TREE_MODEL(cmodel_k);

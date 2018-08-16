@@ -53,3 +53,55 @@ int finalize()
   }
   return errors;
 }
+
+
+GtkTreeStore *create_model()
+{
+  GtkTreeIter top_level, child, subchild;
+
+  GtkTreeStore *model_store = gtk_tree_store_new(2,
+                                                 G_TYPE_INT,
+                                                 G_TYPE_STRING);
+
+  gtk_tree_store_append(model_store, &top_level, NULL);
+  gtk_tree_store_set(model_store, &top_level,
+                     0, 1,
+                     1, "Root 1", -1);
+
+  gtk_tree_store_append(model_store, &top_level, NULL);
+  gtk_tree_store_set(model_store, &top_level,
+                     0, 10,
+                     1, "Root 2", -1);
+  gtk_tree_store_append(model_store, &child, &top_level);
+  gtk_tree_store_set(model_store, &child,
+                     0, 11,
+                     1, "Child 2.1", -1);
+  gtk_tree_store_append(model_store, &child, &top_level);
+  gtk_tree_store_set(model_store, &child,
+                     0, 23,
+                     1, "Child 2.2", -1);
+  gtk_tree_store_append(model_store, &child, &top_level);
+  gtk_tree_store_set(model_store, &child,
+                     0, 30,
+                     1, "Child 2.3", -1);
+
+  gtk_tree_store_append(model_store, &top_level, NULL);
+  gtk_tree_store_set(model_store, &top_level,
+                     0, 5,
+                     1, "Root 3", -1);
+  gtk_tree_store_append(model_store, &child, &top_level);
+  gtk_tree_store_set(model_store, &child,
+                     0, 6,
+                     1, "Child 3.1", -1);
+  gtk_tree_store_append(model_store, &subchild, &child);
+  gtk_tree_store_set(model_store, &subchild,
+                     0, 16,
+                     1, "Child 3.1.1", -1);
+  gtk_tree_store_append(model_store, &child, &top_level);
+  gtk_tree_store_set(model_store, &child,
+                     0, 7,
+                     1, "Child 3.2", -1);
+
+  return model_store;
+}
+

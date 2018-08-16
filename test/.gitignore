@@ -31,3 +31,4 @@ test-suite.log
 
 test-combo-box
 test-combo-model
+test-combo-model-signals

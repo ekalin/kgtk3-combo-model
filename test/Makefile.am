@@ -28,6 +28,7 @@
 noinst_HEADERS = test-support.h
 
 check_PROGRAMS = test-combo-model \
+                 test-combo-model-signals \
                  test-combo-box
 
 TESTS = $(check_PROGRAMS)
