@@ -45,13 +45,23 @@ typedef struct
   GtkTreeIter  iter;
 } signal_data;
 
+void free_signal_data(signal_data *sigdata)
+{
+  gtk_tree_path_free(sigdata->path);
+  g_free(sigdata);
+}
+
 
 void on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
 {
-  signal_data *sigdata = (signal_data *) user_data;
+  GSList **sigdatas = (GSList **) user_data;
+
+  signal_data *sigdata = g_new0(signal_data, 1);
   sigdata->signal = ROW_CHANGED;
   sigdata->path = gtk_tree_path_copy(path);
   sigdata->iter = *iter;
+
+  *sigdatas = g_slist_append(*sigdatas, sigdata);
 }
 
 
@@ -69,15 +79,15 @@ void create_models(GtkTreeStore **store, GtkTreeModel **model, KGtk3ComboModel *
   *model = GTK_TREE_MODEL(*store);
   *cmodel = kgtk3_combo_model_new(*model);
 }
-#define SETUP() signal_data sigdata;   \
-                GtkTreeStore *store;     \
-                GtkTreeModel *model;     \
-                KGtk3ComboModel *cmodel; \
+#define SETUP() GSList       *sigdatas = NULL; \
+                GtkTreeStore *store;           \
+                GtkTreeModel *model;           \
+                KGtk3ComboModel *cmodel;       \
                 create_models(&store, &model, &cmodel);
 
 
-#define CLEANUP() gtk_tree_path_free(sigdata.path);     \
-                  g_object_unref(cmodel);               \
+#define CLEANUP() g_slist_free_full(sigdatas, (GDestroyNotify) free_signal_data); \
+                  g_object_unref(cmodel); \
                   g_object_unref(store);
 
 
@@ -85,14 +95,17 @@ void
 test_row_changed_root_no_children()
 {
   SETUP();
-  g_signal_connect(cmodel, "row-changed", G_CALLBACK(on_row_changed), &sigdata);
+  g_signal_connect(cmodel, "row-changed",
+                   G_CALLBACK(on_row_changed), &sigdatas);
 
   GtkTreeIter iter;
   gtk_tree_model_iter_nth_child(model, &iter, NULL, 0);
   gtk_tree_store_set(store, &iter, 0, "New text", -1);
 
-  check(sigdata.signal == ROW_CHANGED, "should emit row_changed - root, no children");
-  check_path(sigdata.path, "0", "row_changed path should point to new row - root, no children");
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_CHANGED, "should emit row_changed - root, no children");
+  check_path(sigdata->path, "0", "row_changed path should point to new row - root, no children");
+  check(sigdatas->next == NULL, "only one row_changed emitted - root, no children");
 
   CLEANUP();
 }
@@ -102,15 +115,18 @@ void
 test_row_changed_level1_no_children()
 {
   SETUP();
-  g_signal_connect(cmodel, "row-changed", G_CALLBACK(on_row_changed), &sigdata);
+  g_signal_connect(cmodel, "row-changed",
+                   G_CALLBACK(on_row_changed), &sigdatas);
 
   GtkTreeIter top_level, level1;
   gtk_tree_model_iter_nth_child(model, &top_level, NULL, 1);
   gtk_tree_model_iter_nth_child(model, &level1, &top_level, 2);
   gtk_tree_store_set(store, &level1, 0, "New text", -1);
 
-  check(sigdata.signal == ROW_CHANGED, "should emit row_changed - level 1, no children");
-  check_path(sigdata.path, "1:4", "row_changed path should point to new row - level 1, no children");
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_CHANGED, "should emit row_changed - level 1, no children");
+  check_path(sigdata->path, "1:4", "row_changed path should point to new row - level 1, no children");
+  check(sigdatas->next == NULL, "only one row_changed emitted - level 1, no children");
 
   CLEANUP();
 }
