@@ -35,6 +35,7 @@ enum
 {
   NONE,
   ROW_CHANGED,
+  ROW_DELETED,
 };
 
 
@@ -60,6 +61,18 @@ void on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, g
   sigdata->signal = ROW_CHANGED;
   sigdata->path = gtk_tree_path_copy(path);
   sigdata->iter = *iter;
+
+  *sigdatas = g_slist_append(*sigdatas, sigdata);
+}
+
+
+void on_row_deleted(GtkTreeModel *model, GtkTreePath *path, gpointer user_data)
+{
+  GSList **sigdatas = (GSList **) user_data;
+
+  signal_data *sigdata = g_new0(signal_data, 1);
+  sigdata->signal = ROW_DELETED;
+  sigdata->path = gtk_tree_path_copy(path);
 
   *sigdatas = g_slist_append(*sigdatas, sigdata);
 }
@@ -203,6 +216,53 @@ test_row_changed_level1_with_children()
 }
 
 
+void
+test_row_deleted_root()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-deleted",
+                   G_CALLBACK(on_row_deleted), &sigdatas);
+
+  GtkTreeIter iter;
+  gtk_tree_model_iter_nth_child(model, &iter, NULL, 0);
+  gtk_tree_store_remove(store, &iter);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_DELETED,
+        "should emit row_deleted - root");
+  check_path(sigdata->path, "0",
+             "row_deleted path points to delete row - root");
+  check(sigdatas->next == NULL,
+        "only one row_deleted emitted - root");
+
+  CLEANUP();
+}
+
+
+void
+test_row_deleted_level1()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-deleted",
+                   G_CALLBACK(on_row_deleted), &sigdatas);
+
+  GtkTreeIter top_level, level1;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 1);
+  gtk_tree_store_remove(store, &level1);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_DELETED,
+        "should emit row_deleted - level1");
+  check_path(sigdata->path, "2:3",
+             "row_deleted path points to delete row - level1");
+  check(sigdatas->next == NULL,
+        "only one row_deleted emitted - level1");
+
+  CLEANUP();
+}
+
+
 int
 main(int argc, char *argv[])
 {
@@ -210,6 +270,9 @@ main(int argc, char *argv[])
   test_row_changed_level1_no_children();
   test_row_changed_root_with_children();
   test_row_changed_level1_with_children();
+
+  test_row_deleted_root();
+  test_row_deleted_level1();
 
   /*
    * End
