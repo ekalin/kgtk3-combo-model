@@ -36,6 +36,7 @@ enum
   NONE,
   ROW_CHANGED,
   ROW_DELETED,
+  ROW_HAS_CHILD_TOGGLED,
 };
 
 
@@ -73,6 +74,19 @@ void on_row_deleted(GtkTreeModel *model, GtkTreePath *path, gpointer user_data)
   signal_data *sigdata = g_new0(signal_data, 1);
   sigdata->signal = ROW_DELETED;
   sigdata->path = gtk_tree_path_copy(path);
+
+  *sigdatas = g_slist_append(*sigdatas, sigdata);
+}
+
+
+void on_row_has_child_toggled(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
+{
+  GSList **sigdatas = (GSList **) user_data;
+
+  signal_data *sigdata = g_new0(signal_data, 1);
+  sigdata->signal = ROW_HAS_CHILD_TOGGLED;
+  sigdata->path = gtk_tree_path_copy(path);
+  sigdata->iter = *iter;
 
   *sigdatas = g_slist_append(*sigdatas, sigdata);
 }
@@ -231,7 +245,7 @@ test_row_deleted_root()
   check(sigdata->signal == ROW_DELETED,
         "should emit row_deleted - root");
   check_path(sigdata->path, "0",
-             "row_deleted path points to delete row - root");
+             "row_deleted path points to deleted row - root");
   check(sigdatas->next == NULL,
         "only one row_deleted emitted - root");
 
@@ -255,7 +269,7 @@ test_row_deleted_level1()
   check(sigdata->signal == ROW_DELETED,
         "should emit row_deleted - level1");
   check_path(sigdata->path, "2:2",
-             "row_deleted path points to delete row - level1");
+             "row_deleted path points to deleted row - level1");
   check(sigdatas->next == NULL,
         "only one row_deleted emitted - level1");
 
@@ -304,6 +318,57 @@ test_row_deleted_including_virtual_items()
 }
 
 
+void
+test_row_has_child_toggled_on_deletion()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-has-child-toggled",
+                   G_CALLBACK(on_row_has_child_toggled), &sigdatas);
+
+  GtkTreeIter top_level, level1, level2;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
+  gtk_tree_model_iter_nth_child(model, &level2, &level1, 0);
+  gtk_tree_store_remove(store, &level2);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_HAS_CHILD_TOGGLED,
+        "should emit row_has_child_toggled when last child is deleted");
+  check_path(sigdata->path, "2:2",
+             "should emit row_has_child_toggled when last child is deleted - path");
+
+  check(sigdatas->next == NULL,
+        "only one row_has_child_toggled emitted when last child is deleted");
+
+  CLEANUP();
+}
+
+
+void
+test_row_has_child_toggled_on_insertion()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-has-child-toggled",
+                   G_CALLBACK(on_row_has_child_toggled), &sigdatas);
+
+  GtkTreeIter top_level, level1, level2;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 1);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 1);
+  gtk_tree_store_append(store, &level2, &level1);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_HAS_CHILD_TOGGLED,
+        "should emit row_has_child_toggled when first child is inserted");
+  check_path(sigdata->path, "1:3",
+             "should emit row_has_child_toggled when first child is inserted - path");
+
+  check(sigdatas->next == NULL,
+        "only one row_has_child_toggled emitted when first child is inserted");
+
+  CLEANUP();
+}
+
+
 int
 main(int argc, char *argv[])
 {
@@ -315,6 +380,9 @@ main(int argc, char *argv[])
   test_row_deleted_root();
   test_row_deleted_level1();
   test_row_deleted_including_virtual_items();
+
+  test_row_has_child_toggled_on_deletion();
+  test_row_has_child_toggled_on_insertion();
 
   /*
    * End
