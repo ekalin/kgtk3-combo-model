@@ -107,6 +107,7 @@ struct _KGtk3ComboModel
 
   gulong        row_changed_id;
   gulong        row_deleted_id;
+  gulong        row_has_child_toggled_id;
 };
 
 #define TYPE_REGULAR   GINT_TO_POINTER(0)
@@ -135,6 +136,7 @@ static GtkTreePath *kgtk3_combo_model_convert_base_path_to_path(GtkTreePath *bas
 
 static void on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 static void on_row_deleted(GtkTreeModel *model, GtkTreePath *base_path, gpointer data);
+static void on_row_has_child_toggled(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -207,6 +209,8 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
                                           G_CALLBACK(on_row_changed), self);
   self->row_deleted_id = g_signal_connect(base_model, "row-deleted",
                                           G_CALLBACK(on_row_deleted), self);
+  self->row_has_child_toggled_id = g_signal_connect(base_model, "row-has-child-toggled",
+                                                    G_CALLBACK(on_row_has_child_toggled), self);
 
   g_object_ref(base_model);
 
@@ -222,6 +226,7 @@ kgtk3_combo_model_dispose(GObject *object)
 
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_changed_id);
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_deleted_id);
+  g_signal_handler_disconnect(cmodel->base_model, cmodel->row_has_child_toggled_id);
 
   g_object_unref(cmodel->base_model);
 
@@ -518,3 +523,22 @@ on_row_deleted(GtkTreeModel *model, GtkTreePath *base_path, gpointer data)
   gtk_tree_path_free(path);
 }
 
+
+static
+void
+on_row_has_child_toggled(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data)
+{
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(data);
+
+  if (!gtk_tree_model_iter_has_child(model, base_iter)) {
+    GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
+
+    gtk_tree_path_append_index(path, 1);
+    gtk_tree_model_row_deleted(cmodel, path);
+
+    gtk_tree_path_prev(path);
+    gtk_tree_model_row_deleted(cmodel, path);
+
+    gtk_tree_path_free(path);
+  }
+}

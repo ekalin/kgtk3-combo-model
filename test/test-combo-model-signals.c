@@ -248,16 +248,57 @@ test_row_deleted_level1()
 
   GtkTreeIter top_level, level1;
   gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
-  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 1);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
   gtk_tree_store_remove(store, &level1);
 
   signal_data *sigdata = sigdatas->data;
   check(sigdata->signal == ROW_DELETED,
         "should emit row_deleted - level1");
-  check_path(sigdata->path, "2:3",
+  check_path(sigdata->path, "2:2",
              "row_deleted path points to delete row - level1");
   check(sigdatas->next == NULL,
         "only one row_deleted emitted - level1");
+
+  CLEANUP();
+}
+
+
+void
+test_row_deleted_including_virtual_items()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-deleted",
+                   G_CALLBACK(on_row_deleted), &sigdatas);
+
+  GtkTreeIter top_level, level1, level2;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
+  gtk_tree_model_iter_nth_child(model, &level2, &level1, 0);
+  gtk_tree_store_remove(store, &level2);
+
+  GSList *i = sigdatas;
+  signal_data *sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "should emit row_deleted for regular item");
+  check_path(sigdata->path, "2:2:2",
+             "should emit row_deleted for regular item - path");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "should emit row_deleted for separator item");
+  check_path(sigdata->path, "2:2:1",
+             "should emit row_deleted for separator item - path");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "should emit row_deleted for header item");
+  check_path(sigdata->path, "2:2:0",
+             "should emit row_deleted for header item - path");
+
+  check(i->next == NULL,
+        "three row_deleted emitted - removing last child");
 
   CLEANUP();
 }
@@ -273,6 +314,7 @@ main(int argc, char *argv[])
 
   test_row_deleted_root();
   test_row_deleted_level1();
+  test_row_deleted_including_virtual_items();
 
   /*
    * End
