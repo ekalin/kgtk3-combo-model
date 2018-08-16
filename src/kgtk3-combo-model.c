@@ -130,7 +130,9 @@ static gint kgtk3_combo_model_iter_n_children(GtkTreeModel *model, GtkTreeIter *
 static gboolean kgtk3_combo_model_iter_nth_child(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *parent, gint n);
 static gboolean kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIter *child);
 
-static void on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
+static GtkTreePath *kgtk3_combo_model_convert_base_path_to_path(GtkTreePath *base_path);
+
+static void on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -327,6 +329,23 @@ kgtk3_combo_model_get_path(GtkTreeModel *model, GtkTreeIter *iter)
     return NULL;
   }
 
+  GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
+  gtk_tree_path_free(base_path);
+
+  if (iter->user_data3 == TYPE_HEADER) {
+    gtk_tree_path_append_index(path, 0);
+  } else if (iter->user_data3 == TYPE_SEPARATOR) {
+    gtk_tree_path_append_index(path, 1);
+  }
+
+  return path;
+}
+
+
+static
+GtkTreePath *
+kgtk3_combo_model_convert_base_path_to_path(GtkTreePath *base_path)
+{
   gint depth;
   gint *indices = gtk_tree_path_get_indices_with_depth(base_path, &depth);
 
@@ -334,13 +353,6 @@ kgtk3_combo_model_get_path(GtkTreeModel *model, GtkTreeIter *iter)
   gtk_tree_path_append_index(path, indices[0]);
   for (int i = 1; i < depth; ++i) {
     gtk_tree_path_append_index(path, indices[i] + 2);
-  }
-  gtk_tree_path_free(base_path);
-
-  if (iter->user_data3 == TYPE_HEADER) {
-    gtk_tree_path_append_index(path, 0);
-  } else if (iter->user_data3 == TYPE_SEPARATOR) {
-    gtk_tree_path_append_index(path, 1);
   }
 
   return path;
@@ -471,10 +483,14 @@ kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *iter, GtkTreeIte
 
 static
 void
-on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data)
 {
-  KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(data);
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(data);
+  GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
+  GtkTreeIter iter;
+  kgtk3_combo_model_get_iter(cmodel, &iter, path);
 
-  gtk_tree_model_row_changed(GTK_TREE_MODEL(cmodel), path, iter);
+  gtk_tree_model_row_changed(cmodel, path, &iter);
+  gtk_tree_path_free(path);
 }
 

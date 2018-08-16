@@ -98,10 +98,29 @@ test_row_changed_root_no_children()
 }
 
 
+void
+test_row_changed_level1_no_children()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-changed", G_CALLBACK(on_row_changed), &sigdata);
+
+  GtkTreeIter top_level, level1;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 1);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 2);
+  gtk_tree_store_set(store, &level1, 0, "New text", -1);
+
+  check(sigdata.signal == ROW_CHANGED, "should emit row_changed - level 1, no children");
+  check_path(sigdata.path, "1:4", "row_changed path should point to new row - level 1, no children");
+
+  CLEANUP();
+}
+
+
 int
 main(int argc, char *argv[])
 {
   test_row_changed_root_no_children();
+  test_row_changed_level1_no_children();
 
   /*
    * End
