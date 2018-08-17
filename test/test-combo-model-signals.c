@@ -345,6 +345,48 @@ test_row_has_child_toggled_on_deletion()
 
 
 void
+test_signal_order_when_deleting_last_child()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-deleted",
+                   G_CALLBACK(on_row_deleted), &sigdatas);
+  g_signal_connect(cmodel, "row-has-child-toggled",
+                   G_CALLBACK(on_row_has_child_toggled), &sigdatas);
+
+  GtkTreeIter top_level, level1, level2;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
+  gtk_tree_model_iter_nth_child(model, &level2, &level1, 0);
+  gtk_tree_store_remove(store, &level2);
+
+  GSList *i = sigdatas;
+  signal_data *sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "signals when deleting last child - 1st should be row_removed");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "signals when deleting last child - 2nd should be row_removed");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_DELETED,
+        "signals when deleting last child - 3rd should be row_removed");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_HAS_CHILD_TOGGLED,
+        "signals when deleting last child - 4th should be has_child_toggled");
+
+  check(i->next == NULL,
+        "signals when deleting last child - 4 signals emitted");
+
+  CLEANUP();
+}
+
+
+void
 test_row_has_child_toggled_on_insertion()
 {
   SETUP();
@@ -382,6 +424,7 @@ main(int argc, char *argv[])
   test_row_deleted_including_virtual_items();
 
   test_row_has_child_toggled_on_deletion();
+  test_signal_order_when_deleting_last_child();
   test_row_has_child_toggled_on_insertion();
 
   /*
