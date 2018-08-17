@@ -510,6 +510,46 @@ test_row_has_child_toggled_on_insertion()
 }
 
 
+void
+test_signal_order_when_inserting_first_child()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-inserted",
+                   G_CALLBACK(on_row_inserted), &sigdatas);
+  g_signal_connect(cmodel, "row-has-child-toggled",
+                   G_CALLBACK(on_row_has_child_toggled), &sigdatas);
+
+  GtkTreeIter iter, level1;
+  gtk_tree_model_iter_children(model, &iter, NULL);
+  gtk_tree_store_insert(store, &level1, &iter, 0);
+
+  GSList *i = sigdatas;
+  signal_data *sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "signals when inserting first child - 1st should be row_inserted");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_HAS_CHILD_TOGGLED,
+        "signals when inserting first child - 2nd should be row_has_child_toggled");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "signals when inserting first child - 3rd should be row_inserted");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "signals when inserting first child - 4th should be row_inserted");
+
+  check(i->next == NULL,
+        "signals when inserting first child - 4 signals emitted");
+
+  CLEANUP();
+}
+
+
 int
 main(int argc, char *argv[])
 {
@@ -529,6 +569,7 @@ main(int argc, char *argv[])
   test_row_has_child_toggled_on_deletion();
   test_signal_order_when_deleting_last_child();
   test_row_has_child_toggled_on_insertion();
+  test_signal_order_when_inserting_first_child();
 
   /*
    * End
