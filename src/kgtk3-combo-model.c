@@ -106,6 +106,7 @@ struct _KGtk3ComboModel
   gint          separator_column;
 
   gulong        row_changed_id;
+  gulong        row_inserted_id;
   gulong        row_deleted_id;
   gulong        row_has_child_toggled_id;
 };
@@ -135,6 +136,7 @@ static gboolean kgtk3_combo_model_iter_parent(GtkTreeModel *model, GtkTreeIter *
 static GtkTreePath *kgtk3_combo_model_convert_base_path_to_path(GtkTreePath *base_path);
 
 static void on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
+static void on_row_inserted(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 static void on_row_deleted(GtkTreeModel *model, GtkTreePath *base_path, gpointer data);
 static void on_row_has_child_toggled(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 
@@ -207,6 +209,8 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
 
   self->row_changed_id = g_signal_connect(base_model, "row-changed",
                                           G_CALLBACK(on_row_changed), self);
+  self->row_inserted_id = g_signal_connect(base_model, "row-inserted",
+                                          G_CALLBACK(on_row_inserted), self);
   self->row_deleted_id = g_signal_connect(base_model, "row-deleted",
                                           G_CALLBACK(on_row_deleted), self);
   self->row_has_child_toggled_id = g_signal_connect(base_model, "row-has-child-toggled",
@@ -225,6 +229,7 @@ kgtk3_combo_model_dispose(GObject *object)
   KGtk3ComboModel *cmodel = KGTK3_COMBO_MODEL(object);
 
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_changed_id);
+  g_signal_handler_disconnect(cmodel->base_model, cmodel->row_inserted_id);
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_deleted_id);
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_has_child_toggled_id);
 
@@ -508,6 +513,20 @@ on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_it
     gtk_tree_model_row_changed(cmodel, path, &iter);
   }
 
+  gtk_tree_path_free(path);
+}
+
+
+static
+void
+on_row_inserted(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data)
+{
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(data);
+  GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
+  GtkTreeIter iter;
+  kgtk3_combo_model_get_iter(cmodel, &iter, path);
+
+  gtk_tree_model_row_inserted(cmodel, path, &iter);
   gtk_tree_path_free(path);
 }
 

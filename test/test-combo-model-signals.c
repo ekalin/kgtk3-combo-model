@@ -35,6 +35,7 @@ enum
 {
   NONE,
   ROW_CHANGED,
+  ROW_INSERTED,
   ROW_DELETED,
   ROW_HAS_CHILD_TOGGLED,
 };
@@ -60,6 +61,19 @@ void on_row_changed(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, g
 
   signal_data *sigdata = g_new0(signal_data, 1);
   sigdata->signal = ROW_CHANGED;
+  sigdata->path = gtk_tree_path_copy(path);
+  sigdata->iter = *iter;
+
+  *sigdatas = g_slist_append(*sigdatas, sigdata);
+}
+
+
+void on_row_inserted(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer user_data)
+{
+  GSList **sigdatas = (GSList **) user_data;
+
+  signal_data *sigdata = g_new0(signal_data, 1);
+  sigdata->signal = ROW_INSERTED;
   sigdata->path = gtk_tree_path_copy(path);
   sigdata->iter = *iter;
 
@@ -231,6 +245,52 @@ test_row_changed_level1_with_children()
 
 
 void
+test_row_inserted_root()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-inserted",
+                   G_CALLBACK(on_row_inserted), &sigdatas);
+
+  GtkTreeIter iter;
+  gtk_tree_store_append(store, &iter, NULL);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "should emit row_inserted - root");
+  check_path(sigdata->path, "3",
+             "row_inserted path points to inserted row - root");
+  check(sigdatas->next == NULL,
+        "only one row_inserted emitted - root");
+
+  CLEANUP();
+}
+
+
+void
+test_row_inserted_level2()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-inserted",
+                   G_CALLBACK(on_row_inserted), &sigdatas);
+
+  GtkTreeIter top_level, level1, level2;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
+  gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
+  gtk_tree_store_insert(store, &level2, &level1, 0);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "should emit row_inserted - level 2");
+  check_path(sigdata->path, "2:2:2",
+             "row_inserted path points to inserted row - level 2");
+  check(sigdatas->next == NULL,
+        "only one row_inserted emitted - level 2");
+
+  CLEANUP();
+}
+
+
+void
 test_row_deleted_root()
 {
   SETUP();
@@ -362,22 +422,22 @@ test_signal_order_when_deleting_last_child()
   GSList *i = sigdatas;
   signal_data *sigdata = i->data;
   check(sigdata->signal == ROW_DELETED,
-        "signals when deleting last child - 1st should be row_removed");
+        "signals when deleting last child - 1st should be row_deleted");
 
   i = i->next;
   sigdata = i->data;
   check(sigdata->signal == ROW_DELETED,
-        "signals when deleting last child - 2nd should be row_removed");
+        "signals when deleting last child - 2nd should be row_deleted");
 
   i = i->next;
   sigdata = i->data;
   check(sigdata->signal == ROW_DELETED,
-        "signals when deleting last child - 3rd should be row_removed");
+        "signals when deleting last child - 3rd should be row_deleted");
 
   i = i->next;
   sigdata = i->data;
   check(sigdata->signal == ROW_HAS_CHILD_TOGGLED,
-        "signals when deleting last child - 4th should be has_child_toggled");
+        "signals when deleting last child - 4th should be row_has_child_toggled");
 
   check(i->next == NULL,
         "signals when deleting last child - 4 signals emitted");
@@ -418,6 +478,9 @@ main(int argc, char *argv[])
   test_row_changed_level1_no_children();
   test_row_changed_root_with_children();
   test_row_changed_level1_with_children();
+
+  test_row_inserted_root();
+  test_row_inserted_level2();
 
   test_row_deleted_root();
   test_row_deleted_level1();
