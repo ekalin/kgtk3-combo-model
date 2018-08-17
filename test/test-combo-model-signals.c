@@ -291,6 +291,45 @@ test_row_inserted_level2()
 
 
 void
+test_row_inserted_including_virtual_items()
+{
+  SETUP();
+  g_signal_connect(cmodel, "row-inserted",
+                   G_CALLBACK(on_row_inserted), &sigdatas);
+
+  GtkTreeIter iter, level1;
+  gtk_tree_model_iter_children(model, &iter, NULL);
+  gtk_tree_store_insert(store, &level1, &iter, 0);
+
+  GSList *i = sigdatas;
+  signal_data *sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "should emit row_inserted for virtual items - header");
+  check_path(sigdata->path, "0:0",
+             "should emit row_inserted for virtual items - header path");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "should emit row_inserted for virtual items - separator");
+  check_path(sigdata->path, "0:1",
+             "should emit row_inserted for virtual items - separator path");
+
+  i = i->next;
+  sigdata = i->data;
+  check(sigdata->signal == ROW_INSERTED,
+        "should emit row_inserted for virtual items - regular");
+  check_path(sigdata->path, "0:2",
+             "should emit row_inserted for virtual items - regular path");
+
+  check(i->next == NULL,
+        "three row_inserted emitted for virtual items");
+
+  CLEANUP();
+}
+
+
+void
 test_row_deleted_root()
 {
   SETUP();
@@ -481,6 +520,7 @@ main(int argc, char *argv[])
 
   test_row_inserted_root();
   test_row_inserted_level2();
+  test_row_inserted_including_virtual_items();
 
   test_row_deleted_root();
   test_row_deleted_level1();

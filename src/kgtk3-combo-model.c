@@ -522,11 +522,33 @@ void
 on_row_inserted(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data)
 {
   GtkTreeModel *cmodel = GTK_TREE_MODEL(data);
+
+  GtkTreeIter parent;
+  if (!gtk_tree_model_iter_parent(model, &parent, base_iter)) {
+    gtk_tree_model_row_inserted(cmodel, base_path, base_iter);
+    return;
+  }
+
   GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
   GtkTreeIter iter;
-  kgtk3_combo_model_get_iter(cmodel, &iter, path);
 
+  gboolean is_first_child = gtk_tree_model_iter_n_children(model, &parent) == 1;
+  if (is_first_child) {
+    gtk_tree_path_prev(path);
+    gtk_tree_path_prev(path);
+    kgtk3_combo_model_get_iter(cmodel, &iter, path);
+    gtk_tree_model_row_inserted(cmodel, path, &iter);
+
+    gtk_tree_path_next(path);
+    kgtk3_combo_model_get_iter(cmodel, &iter, path);
+    gtk_tree_model_row_inserted(cmodel, path, &iter);
+
+    gtk_tree_path_next(path);
+  }
+
+  kgtk3_combo_model_get_iter(cmodel, &iter, path);
   gtk_tree_model_row_inserted(cmodel, path, &iter);
+
   gtk_tree_path_free(path);
 }
 
