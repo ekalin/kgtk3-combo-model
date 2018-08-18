@@ -114,17 +114,19 @@ void check_path(GtkTreePath *path, const char *expected, const char *msg)
 }
 
 
-void create_models(GtkTreeStore **store, GtkTreeModel **model, KGtk3ComboModel **cmodel)
+void create_models(GtkTreeStore **store, GtkTreeModel **model, KGtk3ComboModel **cmodel, GtkTreeModel **cmodel_g)
 {
   *store = create_model();
   *model = GTK_TREE_MODEL(*store);
   *cmodel = kgtk3_combo_model_new(*model);
+  *cmodel_g = GTK_TREE_MODEL(*cmodel);
 }
-#define SETUP() GSList       *sigdatas = NULL; \
-                GtkTreeStore *store;           \
-                GtkTreeModel *model;           \
-                KGtk3ComboModel *cmodel;       \
-                create_models(&store, &model, &cmodel);
+#define SETUP() GSList          *sigdatas = NULL; \
+                GtkTreeStore    *store;           \
+                GtkTreeModel    *model;           \
+                KGtk3ComboModel *cmodel;          \
+                GtkTreeModel    *cmodel_g;        \
+                create_models(&store, &model, &cmodel, &cmodel_g);
 
 
 #define CLEANUP() g_slist_free_full(sigdatas, (GDestroyNotify) free_signal_data); \
@@ -141,13 +143,15 @@ test_row_changed_root_no_children()
 
   GtkTreeIter iter;
   gtk_tree_model_iter_nth_child(model, &iter, NULL, 0);
-  gtk_tree_store_set(store, &iter, 0, "New text", -1);
+  gtk_tree_store_set(store, &iter, 1, "New text", -1);
 
   signal_data *sigdata = sigdatas->data;
   check(sigdata->signal == ROW_CHANGED,
         "should emit row_changed - root, no children");
   check_path(sigdata->path, "0",
              "row_changed path points to changed row - root, no children");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - root, no children");
   check(sigdatas->next == NULL,
         "only one row_changed emitted - root, no children");
 
@@ -165,13 +169,15 @@ test_row_changed_level1_no_children()
   GtkTreeIter top_level, level1;
   gtk_tree_model_iter_nth_child(model, &top_level, NULL, 1);
   gtk_tree_model_iter_nth_child(model, &level1, &top_level, 2);
-  gtk_tree_store_set(store, &level1, 0, "New text", -1);
+  gtk_tree_store_set(store, &level1, 1, "New text", -1);
 
   signal_data *sigdata = sigdatas->data;
   check(sigdata->signal == ROW_CHANGED,
         "should emit row_changed - level1, no children");
   check_path(sigdata->path, "1:4",
              "row_changed path points to changed row - level1, no children");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - level1, no children");
   check(sigdatas->next == NULL,
         "only one row_changed emitted - level1, no children");
 
@@ -188,7 +194,7 @@ test_row_changed_root_with_children()
 
   GtkTreeIter iter;
   gtk_tree_model_iter_nth_child(model, &iter, NULL, 1);
-  gtk_tree_store_set(store, &iter, 0, "New text", -1);
+  gtk_tree_store_set(store, &iter, 1, "New text", -1);
 
   GSList *i = sigdatas;
   signal_data *sigdata = i->data;
@@ -196,6 +202,8 @@ test_row_changed_root_with_children()
         "should emit row_changed - root, with children, regular");
   check_path(sigdata->path, "1",
              "row_changed path points to changed row - root, with children, regular");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - root, with children, regular");
 
   i = i->next;
   sigdata = i->data;
@@ -203,6 +211,8 @@ test_row_changed_root_with_children()
         "should emit row_changed - root, with children, header");
   check_path(sigdata->path, "1:0",
              "row_changed path points to changed row - root, with children, header");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - root, with children, header");
 
   check(i->next == NULL,
         "two row_changed emitted - root, with children");
@@ -221,7 +231,7 @@ test_row_changed_level1_with_children()
   GtkTreeIter top_level, level1;
   gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
   gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
-  gtk_tree_store_set(store, &level1, 0, "New text", -1);
+  gtk_tree_store_set(store, &level1, 1, "New text", -1);
 
   GSList *i = sigdatas;
   signal_data *sigdata = i->data;
@@ -229,6 +239,8 @@ test_row_changed_level1_with_children()
         "should emit row_changed - level1, with children, regular");
   check_path(sigdata->path, "2:2",
              "row_changed path points to changed row - level1, with children, regular");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - level1, with children, regular");
 
   i = i->next;
   sigdata = i->data;
@@ -236,6 +248,8 @@ test_row_changed_level1_with_children()
         "should emit row_changed - level1, with children, header");
   check_path(sigdata->path, "2:2:0",
              "row_changed path points to changed row - level1, with children, header");
+  check_col_str(cmodel_g, &sigdata->iter, "New text",
+                "row_changed iter points to changed row - level1, with children, header");
 
   check(i->next == NULL,
         "two row_changed emitted - level1, with children");
@@ -252,13 +266,16 @@ test_row_inserted_root()
                    G_CALLBACK(on_row_inserted), &sigdatas);
 
   GtkTreeIter iter;
-  gtk_tree_store_append(store, &iter, NULL);
+  gtk_tree_store_insert_with_values(store, &iter, NULL, 3,
+                                    1, "Inserted row", -1);
 
   signal_data *sigdata = sigdatas->data;
   check(sigdata->signal == ROW_INSERTED,
         "should emit row_inserted - root");
   check_path(sigdata->path, "3",
              "row_inserted path points to inserted row - root");
+  check_col_str(cmodel_g, &sigdata->iter, "Inserted row",
+                "row_inserted iter points to inserted row - root");
   check(sigdatas->next == NULL,
         "only one row_inserted emitted - root");
 
@@ -276,13 +293,16 @@ test_row_inserted_level2()
   GtkTreeIter top_level, level1, level2;
   gtk_tree_model_iter_nth_child(model, &top_level, NULL, 2);
   gtk_tree_model_iter_nth_child(model, &level1, &top_level, 0);
-  gtk_tree_store_insert(store, &level2, &level1, 0);
+  gtk_tree_store_insert_with_values(store, &level2, &level1, 0,
+                                    1, "Inserted row", -1);
 
   signal_data *sigdata = sigdatas->data;
   check(sigdata->signal == ROW_INSERTED,
         "should emit row_inserted - level 2");
   check_path(sigdata->path, "2:2:2",
              "row_inserted path points to inserted row - level 2");
+  check_col_str(cmodel_g, &sigdata->iter, "Inserted row",
+                "row_inserted iter points to inserted row - level 2");
   check(sigdatas->next == NULL,
         "only one row_inserted emitted - level 2");
 
@@ -299,7 +319,8 @@ test_row_inserted_including_virtual_items()
 
   GtkTreeIter iter, level1;
   gtk_tree_model_iter_children(model, &iter, NULL);
-  gtk_tree_store_insert(store, &level1, &iter, 0);
+  gtk_tree_store_insert_with_values(store, &level1, &iter, 0,
+                                    1, "Inserted row", -1);
 
   GSList *i = sigdatas;
   signal_data *sigdata = i->data;
@@ -307,6 +328,8 @@ test_row_inserted_including_virtual_items()
         "should emit row_inserted for virtual items - header");
   check_path(sigdata->path, "0:0",
              "should emit row_inserted for virtual items - header path");
+  check_col_str(cmodel_g, &sigdata->iter, "Root 1",
+                "should emit row_inserted for virtual items - header iter");
 
   i = i->next;
   sigdata = i->data;
@@ -314,6 +337,8 @@ test_row_inserted_including_virtual_items()
         "should emit row_inserted for virtual items - separator");
   check_path(sigdata->path, "0:1",
              "should emit row_inserted for virtual items - separator path");
+  check_col_bool(cmodel_g, &sigdata->iter, TRUE,
+                "should emit row_inserted for virtual items - separator iter");
 
   i = i->next;
   sigdata = i->data;
@@ -321,6 +346,8 @@ test_row_inserted_including_virtual_items()
         "should emit row_inserted for virtual items - regular");
   check_path(sigdata->path, "0:2",
              "should emit row_inserted for virtual items - regular path");
+  check_col_str(cmodel_g, &sigdata->iter, "Inserted row",
+                "should emit row_inserted for virtual items - regular iter");
 
   check(i->next == NULL,
         "three row_inserted emitted for virtual items");
@@ -435,6 +462,8 @@ test_row_has_child_toggled_on_deletion()
         "should emit row_has_child_toggled when last child is deleted");
   check_path(sigdata->path, "2:2",
              "should emit row_has_child_toggled when last child is deleted - path");
+  check_col_str(cmodel_g, &sigdata->iter, "Child 3.1",
+             "should emit row_has_child_toggled when last child is deleted - iter");
 
   check(sigdatas->next == NULL,
         "only one row_has_child_toggled emitted when last child is deleted");
@@ -502,6 +531,8 @@ test_row_has_child_toggled_on_insertion()
         "should emit row_has_child_toggled when first child is inserted");
   check_path(sigdata->path, "1:3",
              "should emit row_has_child_toggled when first child is inserted - path");
+  check_col_str(cmodel_g, &sigdata->iter, "Child 2.2",
+             "should emit row_has_child_toggled when first child is inserted - iter");
 
   check(sigdatas->next == NULL,
         "only one row_has_child_toggled emitted when first child is inserted");

@@ -38,21 +38,6 @@ void check_col_int(GtkTreeModel *model, GtkTreeIter *iter, gint expected, const 
   check(expected == value, msg);
 }
 
-void check_col_bool(GtkTreeModel *model, GtkTreeIter *iter, gboolean expected, const char *msg)
-{
-  gboolean value;
-  gtk_tree_model_get(model, iter, 2, &value, -1);
-  check(expected == value, msg);
-}
-
-void check_col_str(GtkTreeModel *model, GtkTreeIter *iter, const char *expected, const char *msg)
-{
-  gchar *value;
-  gtk_tree_model_get(model, iter, 1, &value, -1);
-  check(strcmp(expected, value) == 0, msg);
-  g_free(value);
-}
-
 void check_path(GtkTreeModel *model, GtkTreeIter *iter, const char *expected, const char *msg)
 {
   GtkTreePath *path = gtk_tree_model_get_path(model, iter);
