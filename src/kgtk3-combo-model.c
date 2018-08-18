@@ -108,6 +108,7 @@ struct _KGtk3ComboModel
   gulong        row_changed_id;
   gulong        row_inserted_id;
   gulong        row_deleted_id;
+  gulong        rows_reordered_id;
 };
 
 #define TYPE_REGULAR   GINT_TO_POINTER(0)
@@ -137,6 +138,7 @@ static GtkTreePath *kgtk3_combo_model_convert_base_path_to_path(GtkTreePath *bas
 static void on_row_changed(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 static void on_row_inserted(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gpointer data);
 static void on_row_deleted(GtkTreeModel *model, GtkTreePath *base_path, gpointer data);
+static void on_rows_reordered(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gint *base_new_order, gpointer data);
 
 
 G_DEFINE_TYPE_WITH_CODE(KGtk3ComboModel, kgtk3_combo_model, G_TYPE_OBJECT,
@@ -211,6 +213,8 @@ kgtk3_combo_model_new(GtkTreeModel *base_model)
                                           G_CALLBACK(on_row_inserted), self);
   self->row_deleted_id = g_signal_connect(base_model, "row-deleted",
                                           G_CALLBACK(on_row_deleted), self);
+  self->rows_reordered_id = g_signal_connect(base_model, "rows-reordered",
+                                             G_CALLBACK(on_rows_reordered), self);
   // row-has-child-toggle is handled by checks on row-insert and
   // row-deleted, so there's no need to connect to that signal
 
@@ -229,6 +233,7 @@ kgtk3_combo_model_dispose(GObject *object)
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_changed_id);
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_inserted_id);
   g_signal_handler_disconnect(cmodel->base_model, cmodel->row_deleted_id);
+  g_signal_handler_disconnect(cmodel->base_model, cmodel->rows_reordered_id);
 
   g_object_unref(cmodel->base_model);
 
@@ -587,4 +592,34 @@ on_row_deleted(GtkTreeModel *model, GtkTreePath *base_path, gpointer data)
 
   gtk_tree_path_free(parent_path);
   gtk_tree_path_free(path);
+}
+
+
+static
+void
+on_rows_reordered(GtkTreeModel *model, GtkTreePath *base_path, GtkTreeIter *base_iter, gint *base_new_order, gpointer data)
+{
+  GtkTreeModel *cmodel = GTK_TREE_MODEL(data);
+
+  gboolean is_on_root = base_iter == NULL;
+  if (is_on_root) {
+    gtk_tree_model_rows_reordered(cmodel, base_path, base_iter, base_new_order);
+    return;
+  }
+
+  GtkTreePath *path = kgtk3_combo_model_convert_base_path_to_path(base_path);
+  GtkTreeIter iter;
+  gtk_tree_model_get_iter(cmodel, &iter, path);
+
+  gint n = gtk_tree_model_iter_n_children(model, base_iter);
+  gint *new_order = g_new(gint, n + 2);
+  new_order[0] = 0;
+  new_order[1] = 1;
+  for (int i = 0; i < n; ++i) {
+    new_order[i + 2] = base_new_order[i] + 2;
+  }
+
+  gtk_tree_model_rows_reordered(cmodel, path, &iter, new_order);
+  gtk_tree_path_free(path);
+  g_free(new_order);
 }

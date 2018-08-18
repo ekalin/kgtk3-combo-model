@@ -26,6 +26,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include <string.h>
+
 #include <kgtk3-combo-model.h>
 
 #include "test-support.h"
@@ -38,6 +40,7 @@ enum
   ROW_INSERTED,
   ROW_DELETED,
   ROW_HAS_CHILD_TOGGLED,
+  ROWS_REORDERED,
 };
 
 
@@ -46,11 +49,13 @@ typedef struct
   int          signal;
   GtkTreePath *path;
   GtkTreeIter  iter;
+  gint        *new_order;
 } signal_data;
 
 void free_signal_data(signal_data *sigdata)
 {
   gtk_tree_path_free(sigdata->path);
+  g_free(sigdata->new_order);
   g_free(sigdata);
 }
 
@@ -101,6 +106,25 @@ void on_row_has_child_toggled(GtkTreeModel *model, GtkTreePath *path, GtkTreeIte
   sigdata->signal = ROW_HAS_CHILD_TOGGLED;
   sigdata->path = gtk_tree_path_copy(path);
   sigdata->iter = *iter;
+
+  *sigdatas = g_slist_append(*sigdatas, sigdata);
+}
+
+
+void on_rows_reordered(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gint *new_order, gpointer user_data)
+{
+  GSList **sigdatas = (GSList **) user_data;
+
+  signal_data *sigdata = g_new0(signal_data, 1);
+  sigdata->signal = ROWS_REORDERED;
+  sigdata->path = gtk_tree_path_copy(path);
+  if (iter) {
+    sigdata->iter = *iter;
+  }
+
+  gint n = gtk_tree_model_iter_n_children(model, iter);
+  sigdata->new_order = g_new(gint, n);
+  memcpy(sigdata->new_order, new_order, n*sizeof(gint));
 
   *sigdatas = g_slist_append(*sigdatas, sigdata);
 }
@@ -581,6 +605,69 @@ test_signal_order_when_inserting_first_child()
 }
 
 
+void
+test_rows_reordered_root()
+{
+  SETUP();
+  g_signal_connect(cmodel, "rows-reordered",
+                   G_CALLBACK(on_rows_reordered), &sigdatas);
+
+  gint new_order[3] = {1, 2, 0};
+  gtk_tree_store_reorder(store, NULL, new_order);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROWS_REORDERED,
+        "should emit rows_reordered - root");
+  check(gtk_tree_path_get_depth(sigdata->path) == 0,
+        "rows_reordered path should point to parent - root");
+
+  gboolean new_order_ok = sigdata->new_order[0] == 1
+                       && sigdata->new_order[1] == 2
+                       && sigdata->new_order[2] == 0;
+  check(new_order_ok, "rows_reordered new_order should reflect new order - root");
+
+  check(sigdatas->next == NULL,
+        "only one rows_reordered emitted - root");
+
+  CLEANUP();
+}
+
+
+void
+test_rows_reordered_level1()
+{
+  SETUP();
+  g_signal_connect(cmodel, "rows-reordered",
+                   G_CALLBACK(on_rows_reordered), &sigdatas);
+
+  GtkTreeIter top_level;
+  gtk_tree_model_iter_nth_child(model, &top_level, NULL, 1);
+
+  gint new_order[3] = {2, 1, 0};
+  gtk_tree_store_reorder(store, &top_level, new_order);
+
+  signal_data *sigdata = sigdatas->data;
+  check(sigdata->signal == ROWS_REORDERED,
+        "should emit rows_reordered - level 1");
+  check_path(sigdata->path, "1",
+             "rows_reordered path should point to parent - level 1");
+  check_col_str(cmodel_g, &sigdata->iter, "Root 2",
+             "rows_reordered iter should point to parent - level 1");
+
+  gboolean new_order_ok = sigdata->new_order[0] == 0
+                       && sigdata->new_order[1] == 1
+                       && sigdata->new_order[2] == 4
+                       && sigdata->new_order[3] == 3
+                       && sigdata->new_order[4] == 2;
+  check(new_order_ok, "rows_reordered new_order should reflect new order - level 1");
+
+  check(sigdatas->next == NULL,
+        "only one rows_reordered emitted - level 1");
+
+  CLEANUP();
+}
+
+
 int
 main(int argc, char *argv[])
 {
@@ -601,6 +688,9 @@ main(int argc, char *argv[])
   test_signal_order_when_deleting_last_child();
   test_row_has_child_toggled_on_insertion();
   test_signal_order_when_inserting_first_child();
+
+  test_rows_reordered_root();
+  test_rows_reordered_level1();
 
   /*
    * End
